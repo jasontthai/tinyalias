@@ -31,7 +31,7 @@ func main() {
 
 	database := os.Getenv("DATABASE_URL")
 	if database == "" {
-		database = "postgres://localhost:12345/services?sslmode=disable"
+		database = "postgres://localhost:12345/postgres?sslmode=disable"
 	}
 
 	baseUrl := os.Getenv("BASE_URL")
