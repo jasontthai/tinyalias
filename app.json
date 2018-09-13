@@ -1,12 +1,10 @@
 {
-  "name": "Start on Heroku: Go",
-  "description": "Go Getting Started Example App",
+  "name": "Url Shortener in Go",
+  "description": "simple url shortener in golang",
   "keywords": [
-    "getting-started",
+    "url-shortener",
     "go",
-    "sample",
-    "example"
   ],
-  "website": "http://github.com/heroku/go-getting-started",
+  "website": "jasonthai.me",
   "repository": "http://github.com/heroku/go-getting-started"
 }
