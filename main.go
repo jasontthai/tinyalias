@@ -2,8 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -14,6 +12,7 @@ import (
 	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	log "github.com/sirupsen/logrus"
 	"github.com/zirius/url-shortener/models"
 	"github.com/zirius/url-shortener/pg"
 )
@@ -21,6 +20,12 @@ import (
 const (
 	base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
 )
+
+func init() {
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	log.SetOutput(os.Stdout)
+}
 
 func main() {
 	port := os.Getenv("PORT")
@@ -49,7 +54,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error opening database: %q", err)
 	}
-	fmt.Println(db)
 
 	router.GET("", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "main.tmpl.html", gin.H{})
@@ -61,16 +65,19 @@ func main() {
 		var shortened string
 		var error = "Oops. Something went wrong. Please try again."
 		if url != "" {
-			log.Printf("Got url: %v", url)
-			url = strings.TrimSpace(url)
+			log.WithFields(log.Fields{
+				"url": url,
+			}).Info("Got URL")
 
+			// URL sanitization
+			url = strings.TrimSpace(url)
 			if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 				url = "https://" + url
 			}
 
 			urlObj, err := pg.GetURL(db, url, "")
 			if err != nil && err != sql.ErrNoRows {
-				log.Printf("Error getting url: %q", err)
+				c.Error(err)
 				c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
 					"error": error,
 				})
@@ -86,7 +93,7 @@ func main() {
 				}
 				err = pg.CreateURL(db, urlObj)
 				if err != nil {
-					log.Printf("Error creating shortened url: %q", err)
+					c.Error(err)
 					c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
 						"error": error,
 					})
@@ -103,11 +110,13 @@ func main() {
 
 	router.GET("/:slug", func(c *gin.Context) {
 		slug := c.Param("slug")
-		log.Printf("Got slug: %v", slug)
+		log.WithFields(log.Fields{
+			"slug": slug,
+		}).Info("Got SLUG")
 
 		urlObj, err := pg.GetURL(db, "", slug)
 		if err != nil && err != sql.ErrNoRows {
-			log.Print("Error getting urls: ", err)
+			c.Error(err)
 		}
 
 		if urlObj != nil {
@@ -115,7 +124,7 @@ func main() {
 			urlObj.Counter += 1
 			err = pg.UpdateURL(db, urlObj)
 			if err != nil {
-				log.Printf("Error updating counter: %q", err)
+				c.Error(err)
 			}
 
 			c.Redirect(http.StatusFound, urlObj.Url)
