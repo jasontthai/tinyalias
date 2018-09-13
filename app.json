@@ -6,5 +6,5 @@
     "go",
   ],
   "website": "jasonthai.me",
-  "repository": "http://github.com/heroku/go-getting-started"
+  "repository": "https://github.com/zirius/url-shortener"
 }
