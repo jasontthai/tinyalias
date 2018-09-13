@@ -29,11 +29,6 @@ func main() {
 		database = "postgres://localhost:12345/postgres?sslmode=disable"
 	}
 
-	baseUrl := os.Getenv("BASE_URL")
-	if baseUrl == "" {
-		baseUrl = "localhost:5000/"
-	}
-
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
