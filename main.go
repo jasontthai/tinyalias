@@ -111,6 +111,13 @@ func main() {
 		}
 
 		if urlObj != nil {
+
+			urlObj.Counter += 1
+			err = pg.UpdateURL(db, urlObj)
+			if err != nil {
+				log.Printf("Error updating counter: %q", err)
+			}
+
 			c.Redirect(http.StatusFound, urlObj.Url)
 			return
 		}

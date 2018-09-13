@@ -8,7 +8,7 @@ import (
 
 func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Select("url, slug, ip, created, updated").
+	sb := psql.Select("url, slug, ip, counter, created, updated").
 		From("urls")
 	if longUrl != "" {
 		sb = sb.Where(squirrel.Eq{"url": longUrl})
@@ -30,7 +30,23 @@ func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 
 func CreateURL(db *sqlx.DB, url *models.URL) error {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Insert("urls").Columns("url, slug, ip, created, updated").Values(url.Url, url.Slug, url.IP, url.Created, url.Updated)
+	sb := psql.Insert("urls").Columns("url, slug, ip, counter, created, updated").Values(url.Url, url.Slug, url.IP, url.Counter, url.Created, url.Updated)
+	sqlStr, args, err := sb.ToSql()
+	if err != nil {
+		return err
+	}
+
+	if _, err = db.Exec(sqlStr, args...); err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateURL(db *sqlx.DB, url *models.URL) error {
+	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+	clauses := make(map[string]interface{})
+	clauses["counter"] = url.Counter
+	sb := psql.Update("urls").SetMap(clauses).Where(squirrel.Eq{"url": url.Url})
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
 		return err
