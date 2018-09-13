@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/heroku/go-getting-started/models"
-	"github.com/heroku/go-getting-started/pg"
 	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/zirius/url-shortener/models"
+	"github.com/zirius/url-shortener/pg"
 )
 
 const (

@@ -2,8 +2,8 @@ package pg
 
 import (
 	"github.com/Masterminds/squirrel"
-	"github.com/heroku/go-getting-started/models"
 	"github.com/jmoiron/sqlx"
+	"github.com/zirius/url-shortener/models"
 )
 
 func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
