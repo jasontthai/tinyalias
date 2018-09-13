@@ -30,6 +30,9 @@
             {{ if .url  }}
              <h1> {{.url}} </h1>
             {{ end }}
+            {{ if .error }}
+             <h1 style="color:red">  {{.error}} </h1>
+            {{ end }}
         </div>
     </div>
 	</body>
