@@ -3,28 +3,22 @@
 	{{template "header.tmpl.html"}}
 	<body>
     <div class="jumbotron vertical-center">
-        <div class="container">
+        <div class="container" style="width: 50%">
         <form method="POST">
-            <div class="form-row">
-                <div class="col">
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend justify-content-center">
-                            <span class="input-group-text" id="longURLHelp">URL</span>
-                        </div>
-                        <input type="text" class="form-control" name="URL" placeholder="Enter url" aria-label="url" aria-describedby="longURLHelp">
-                        <div class="input-group-append justify-content-center">
-                            <button type="submit" class="btn btn-primary">Shorten</button>
-                        </div>
-                    </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend justify-content-center">
+                    <span class="input-group-text" id="longURLHelp">URL</span>
                 </div>
-                {{/*<div class="col">*/}}
-                    {{/*<div class="input-group mb-3">*/}}
-                        {{/*<div class="input-group-prepend justify-content-center">*/}}
-                            {{/*<span class="input-group-text" id="slugHelp">Slug</span>*/}}
-                        {{/*</div>*/}}
-                        {{/*<input type="text" class="form-control" name="SLUG" placeholder="Slug (optional)" aria-label="slug" aria-describedby="slugHelp">*/}}
-                    {{/*</div>*/}}
-                {{/*</div>*/}}
+                <input type="text" class="form-control" name="URL" placeholder="Enter url" aria-label="url" aria-describedby="longURLHelp">
+                <div class="input-group-append justify-content-center">
+                    <button type="submit" class="btn btn-primary">Shorten</button>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3">{{ .baseUrl }}</span>
+                </div>
+                <input type="text" class="form-control" name="SLUG" aria-describedby="basic-addon3" placeholder="Alias (optional)">
             </div>
         </form>
             {{ if .url  }}

@@ -29,20 +29,24 @@ const (
 )
 
 func GetHomePage(c *gin.Context) {
-	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{})
+	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+		"baseUrl": baseUrl,
+	})
 }
 
 func CreateURL(c *gin.Context) {
 	db := middleware.GetDB(c)
 
 	url := c.PostForm("URL")
+	slug := c.PostForm("SLUG")
+	log.WithFields(log.Fields{
+		"url": url,
+		"slug": slug
+	}).Info("Got Post Form")
+
 	var shortened string
 	var error = "Oops. Something went wrong. Please try again."
 	if url != "" {
-		log.WithFields(log.Fields{
-			"url": url,
-		}).Info("Got URL")
-
 		// URL sanitization
 		url = strings.TrimSpace(url)
 		if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
@@ -57,11 +61,30 @@ func CreateURL(c *gin.Context) {
 			})
 			return
 		}
+
+
+		if slug != "" {
+			urlObjBySlug, err := pg.GetURL(db, "", slug)
+			if err != nil && err != sql.ErrNoRows {
+				c.Error(err)
+				c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+					"error": error,
+				})
+				return
+			}
+			if urlObjBySlug != nil {
+				// slug already exists so we generate new slug
+				slug = slug + "-" + generateSlug(2)
+			}
+		} else {
+			slug = generateSlug(6)
+		}
+
 		if urlObj == nil {
 			// New URL
 			urlObj = &models.URL{
 				Url:     url,
-				Slug:    generateSlug(),
+				Slug:    slug,
 				Created: time.Now(),
 				IP:      c.ClientIP(),
 			}
@@ -78,7 +101,8 @@ func CreateURL(c *gin.Context) {
 
 	}
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
-		"url": shortened,
+		"url":     shortened,
+		"baseUrl": baseUrl,
 	})
 }
 
@@ -110,12 +134,12 @@ func GetURL(c *gin.Context) {
 	return
 }
 
-func generateSlug() string {
+func generateSlug(size int) string {
 	s := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(s)
 
 	var slug string
-	for i := 0; i < 6; i++ {
+	for i := 0; i < size; i++ {
 		idx := r.Intn(len(base))
 		slug = slug + string(base[idx])
 	}
