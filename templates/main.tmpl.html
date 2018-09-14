@@ -1,9 +1,7 @@
 <!doctype html>
 <html lang="en">
 	{{template "header.tmpl.html"}}
-	<body>
-
-    <div class="jumbotron vertical-center">
+	<body class="jumbotron vertical-center">
         <div class="center_div">
             <form method="POST">
                 <div class="input-group mb-3">
@@ -30,7 +28,6 @@
                 <h1 style="color:red">  {{.error}} </h1>
             {{ end }}
         </div>
-    </div>
 
     <script>
         var url = document.getElementById('url')
