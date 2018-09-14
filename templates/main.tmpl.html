@@ -22,7 +22,8 @@
             </div>
         </form>
             {{ if .url  }}
-             <h1> {{.url}} <a style="color:white" id="url" href="#" data-clipboard-text={{.url}}>[Copy]</a></h1>
+             <h1> <a style="color:white" id="url" href="#" data-clipboard-text={{.url}}>{{.url}}</a> </h1>
+             <span id="copied"></span>
             {{ end }}
             {{ if .error }}
              <h1 style="color:red">  {{.error}} </h1>
@@ -35,6 +36,7 @@
         var clipboard = new ClipboardJS(url);
 
         clipboard.on('success', function(e) {
+            document.getElementById("copied").innerText = "Copied!"
             console.log(e);
         });
         clipboard.on('error', function(e) {
