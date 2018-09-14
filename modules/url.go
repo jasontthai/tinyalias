@@ -97,8 +97,9 @@ func CreateURL(c *gin.Context) {
 			}
 		}
 		shortened = baseUrl + urlObj.Slug
-
 	}
+
+	log.Info("Shortened URL generated: %v", shortened)
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
 		"url":     shortened,
 		"baseUrl": baseUrl,
