@@ -22,12 +22,24 @@
             </div>
         </form>
             {{ if .url  }}
-             <h1> {{.url}} </h1>
+             <h1> {{.url}} <a style="color:white" id="url" href="#" data-clipboard-text={{.url}}>[Copy]</a></h1>
             {{ end }}
             {{ if .error }}
              <h1 style="color:red">  {{.error}} </h1>
             {{ end }}
         </div>
     </div>
+
+    <script>
+        var url = document.getElementById('url')
+        var clipboard = new ClipboardJS(url);
+
+        clipboard.on('success', function(e) {
+            console.log(e);
+        });
+        clipboard.on('error', function(e) {
+            console.log(e);
+        });
+    </script>
 	</body>
 </html>
