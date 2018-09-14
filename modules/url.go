@@ -40,8 +40,8 @@ func CreateURL(c *gin.Context) {
 	url := c.PostForm("URL")
 	slug := c.PostForm("SLUG")
 	log.WithFields(log.Fields{
-		"url": url,
-		"slug": slug
+		"url":  url,
+		"slug": slug,
 	}).Info("Got Post Form")
 
 	var shortened string
@@ -61,7 +61,6 @@ func CreateURL(c *gin.Context) {
 			})
 			return
 		}
-
 
 		if slug != "" {
 			urlObjBySlug, err := pg.GetURL(db, "", slug)
