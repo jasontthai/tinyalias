@@ -29,6 +29,8 @@ func main() {
 		database = "postgres://localhost:12345/postgres?sslmode=disable"
 	}
 
+	APIEnable := os.Getenv("API_ENABLE")
+
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -36,11 +38,14 @@ func main() {
 	//router.Static("/static", "static")
 	router.Use(middleware.Database(database))
 
-	router.GET("", modules.GetHomePage)
-
-	router.POST("", modules.CreateURL)
-
-	router.GET("/:slug", modules.GetURL)
+	if APIEnable == "" {
+		router.GET("", modules.GetHomePage)
+		router.POST("", modules.CreateURL)
+		router.GET("/:slug", modules.GetURL)
+	} else {
+		router.GET("/create", modules.APICreateURL)
+		router.GET("", modules.APIGetURL)
+	}
 
 	router.Run(":" + port)
 }
