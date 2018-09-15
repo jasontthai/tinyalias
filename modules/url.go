@@ -91,7 +91,7 @@ func GetURL(c *gin.Context) {
 
 func APICreateURL(c *gin.Context) {
 	url := c.Query("url")
-	slug := c.Query("slug")
+	slug := c.Query("alias")
 	log.WithFields(log.Fields{
 		"url":  url,
 		"slug": slug,
