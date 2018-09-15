@@ -108,8 +108,9 @@ func APICreateURL(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"url":     shortened,
+		"success":  true,
+		"short":    shortened,
+		"original": url,
 	})
 }
 
