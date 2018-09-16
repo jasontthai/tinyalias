@@ -19,14 +19,13 @@ func init() {
 
 func main() {
 	port := os.Getenv("PORT")
-
 	if port == "" {
 		log.Fatal("$PORT must be set")
 	}
 
 	database := os.Getenv("DATABASE_URL")
 	if database == "" {
-		database = "postgres://localhost:12345/postgres?sslmode=disable"
+		log.Fatal("$DATABASE_URL must be set")
 	}
 
 	APIEnable := os.Getenv("API_ENABLE")
