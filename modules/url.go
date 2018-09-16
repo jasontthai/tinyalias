@@ -20,9 +20,6 @@ var secret string
 
 func init() {
 	baseUrl = os.Getenv("BASE_URL")
-	if baseUrl == "" {
-		baseUrl = "localhost:5000/"
-	}
 
 	// secret in order to use API GET route
 	secret = os.Getenv("SECRET")
