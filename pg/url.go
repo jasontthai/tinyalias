@@ -31,7 +31,7 @@ func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 func GetURLs(db *sqlx.DB) ([]models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	sb := psql.Select("url, slug, ip, counter, created, updated").
-		From("urls")
+		From("urls").OrderBy("created desc")
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
 		return nil, err
