@@ -66,6 +66,11 @@ func GetURL(c *gin.Context) {
 		"slug": slug,
 	}).Info("Got SLUG")
 
+	if slug == "wakemydyno.txt" {
+		c.String(http.StatusOK, "wakemydyno")
+		return
+	}
+
 	urlObj, err := pg.GetURL(db, "", slug)
 	if err != nil && err != sql.ErrNoRows {
 		c.Error(err)
