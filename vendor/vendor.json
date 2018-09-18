@@ -3,12 +3,6 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "33ZPhScSCqCumrf7EpL7pAOjYak=",
-			"path": "github.com/Kount/pq-timeouts",
-			"revision": "079ba81f56daf25f2c22b7b2c224f5a9ba38840c",
-			"revisionTime": "2016-09-13T19:44:19Z"
-		},
-		{
 			"checksumSHA1": "SEWHtp6LFg0zD7ZEojzgOVYBx4E=",
 			"path": "github.com/Masterminds/squirrel",
 			"revision": "e13dbacee404686afd0acf2d44b8d34869605e03",
@@ -114,16 +108,6 @@
 			"revisionTime": "2018-08-23T06:29:44Z"
 		},
 		{
-			"checksumSHA1": "ZUOd8OUOp+xdpB7p4w/O86Y8wyc=",
-			"path": "github.com/manucorporat/sse",
-			"revision": "c142f0f1baea5cef7f98a8a6c222f6134368c1f5"
-		},
-		{
-			"checksumSHA1": "sEvWJKs6aL3UR/p4v7idVo54urY=",
-			"path": "github.com/mattn/go-colorable",
-			"revision": "40e4aedc8fabf8c23e040057540867186712faa5"
-		},
-		{
 			"checksumSHA1": "GiVgQkx5acnq+JZtYiuHPlhHoso=",
 			"path": "github.com/mattn/go-isatty",
 			"revision": "3fb116b820352b7f0c281308a4d6250c22d94e27",
@@ -208,11 +192,6 @@
 			"revisionTime": "2018-06-14T19:19:50Z"
 		},
 		{
-			"checksumSHA1": "hKZGpbFuCrkE4s1vxubKK1aFlfI=",
-			"path": "golang.org/x/net/context",
-			"revision": "d9558e5c97f85372afee28cf2b6059d7d3818919"
-		},
-		{
 			"checksumSHA1": "GKC8IFNbSdF5HKJVx+Cm/3ASlH8=",
 			"path": "golang.org/x/sys/unix",
 			"revision": "d0be0721c37eeb5299f245a996a483160fc36940",
@@ -223,12 +202,6 @@
 			"path": "golang.org/x/sys/windows",
 			"revision": "d0be0721c37eeb5299f245a996a483160fc36940",
 			"revisionTime": "2018-09-09T03:34:56Z"
-		},
-		{
-			"checksumSHA1": "P7dBpV3QA/3GJWGNwb9Hn3BzCQs=",
-			"comment": "v5.9.1",
-			"path": "gopkg.in/bluesuncorp/validator.v5",
-			"revision": "d627af88ac021317a280d320986282a6dc97549a"
 		},
 		{
 			"checksumSHA1": "P/k5ZGf0lEBgpKgkwy++F7K1PSg=",
