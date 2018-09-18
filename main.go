@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
 	_ "github.com/lib/pq"
+	"github.com/newrelic/go-agent"
+	"github.com/newrelic/go-agent/_integrations/nrgin/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/zirius/url-shortener/middleware"
 	"github.com/zirius/url-shortener/modules"
@@ -31,12 +33,19 @@ func main() {
 
 	APIEnable := os.Getenv("API_ENABLE")
 
+	config := newrelic.NewConfig("tinyalias", os.Getenv("NEW_RELIC_LICENSE_KEY"))
+	app, err := newrelic.NewApplication(config)
+	if err != nil {
+		log.Fatal("error initializing new relic")
+	}
+
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.LoadHTMLGlob("templates/*.tmpl.html")
 	//router.Static("/static", "static")
 	router.Use(middleware.Database(database))
+	router.Use(nrgin.Middleware(app))
 
 	if APIEnable == "" {
 		router.GET("", modules.GetHomePage)
