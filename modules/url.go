@@ -66,8 +66,7 @@ func GetURL(c *gin.Context) {
 		"slug": slug,
 	}).Info("Got SLUG")
 
-	if slug == "wakemydyno.txt" {
-		c.String(http.StatusOK, "wakemydyno")
+	if handled := handleSpecialRoutes(c); handled {
 		return
 	}
 
@@ -200,4 +199,23 @@ func generateSlug(size int) string {
 		slug = slug + string(base[idx])
 	}
 	return slug
+}
+
+func handleSpecialRoutes(c *gin.Context) bool {
+	slug := c.Param("slug")
+	var handled bool
+
+	if slug == "wakemydyno.txt" {
+		c.String(http.StatusOK, "wakemydyno")
+		handled = true
+	}
+	if slug == "favicon.ico" {
+		c.File("./static/favicon.ico")
+		handled = true
+	}
+	if slug == "robots.txt" {
+		c.String(http.StatusOK, "User-agent: *")
+		handled = true
+	}
+	return handled
 }
