@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"github.com/zirius/url-shortener/middleware"
@@ -31,9 +30,7 @@ const (
 )
 
 func GetHomePage(c *gin.Context) {
-	log.Info("Host: ", location.Get(c).Hostname())
-	log.Info("Host From C: ", c.Request.Host)
-	if strings.Contains(location.Get(c).Host, "api") {
+	if strings.Contains(c.Request.Host, "api") {
 		APIGetURL(c)
 		return
 	}
@@ -226,7 +223,7 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = true
 	}
 	if slug == "create" {
-		if strings.Contains(location.Get(c).Host, "api") {
+		if strings.Contains(c.Request.Host, "api") {
 			APICreateURL(c)
 			handled = true
 		}
