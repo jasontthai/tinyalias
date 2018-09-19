@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -54,9 +53,6 @@ func main() {
 	} else {
 		router.GET("/create", modules.APICreateURL)
 		router.GET("", modules.APIGetURL)
-		router.GET("/wakemydyno.txt", func(c *gin.Context) {
-			c.String(http.StatusOK, "wakemydyno")
-		})
 	}
 
 	router.Run(":" + port)
