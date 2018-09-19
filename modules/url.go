@@ -32,6 +32,7 @@ const (
 
 func GetHomePage(c *gin.Context) {
 	log.Info("Host: ", location.Get(c).Hostname())
+	log.Info("Host From C: ", c.Request.Host)
 	if strings.Contains(location.Get(c).Host, "api") {
 		APIGetURL(c)
 		return
