@@ -30,8 +30,6 @@ func main() {
 		log.Fatal("$DATABASE_URL must be set")
 	}
 
-	APIEnable := os.Getenv("API_ENABLE")
-
 	config := newrelic.NewConfig("tinyalias", os.Getenv("NEW_RELIC_LICENSE_KEY"))
 	app, err := newrelic.NewApplication(config)
 	if err != nil {
@@ -46,14 +44,9 @@ func main() {
 	router.Use(middleware.Database(database))
 	router.Use(nrgin.Middleware(app))
 
-	if APIEnable == "" {
-		router.GET("", modules.GetHomePage)
-		router.POST("", modules.CreateURL)
-		router.GET("/:slug", modules.GetURL)
-	} else {
-		router.GET("/create", modules.APICreateURL)
-		router.GET("", modules.APIGetURL)
-	}
+	router.GET("", modules.GetHomePage)
+	router.POST("", modules.CreateURL)
+	router.GET("/:slug", modules.GetURL)
 
 	router.Run(":" + port)
 }
