@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
 	_ "github.com/lib/pq"
@@ -42,6 +43,7 @@ func main() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.LoadHTMLGlob("templates/*.tmpl.html")
+	router.Use(location.Default())
 	//router.Static("/static", "static")
 	router.Use(middleware.Database(database))
 	router.Use(nrgin.Middleware(app))
