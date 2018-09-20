@@ -31,7 +31,7 @@ const (
 
 func GetHomePage(c *gin.Context) {
 	if strings.Contains(c.Request.Host, "api") {
-		c.AbortWithStatusJSON(http.StatusNotFound, nil)
+		APIGetURL(c)
 		return
 	}
 
@@ -210,15 +210,6 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	slug := c.Param("slug")
 	var handled bool
 
-	if strings.Contains(c.Request.Host, "api") {
-		if slug == "create" {
-			APICreateURL(c)
-		} else {
-			c.AbortWithStatusJSON(http.StatusNotFound, nil)
-		}
-		handled = true
-	}
-
 	if slug == "wakemydyno.txt" {
 		c.String(http.StatusOK, "wakemydyno")
 		handled = true
@@ -230,6 +221,12 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	if slug == "robots.txt" {
 		c.String(http.StatusOK, "User-agent: *")
 		handled = true
+	}
+	if slug == "create" {
+		if strings.Contains(c.Request.Host, "api") {
+			APICreateURL(c)
+			handled = true
+		}
 	}
 	return handled
 }
