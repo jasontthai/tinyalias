@@ -211,6 +211,12 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	var handled bool
 
 	if slug == "wakemydyno.txt" {
+		if strings.Contains(c.Request.Host, "api") {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+				"success": false,
+			})
+			return true
+		}
 		c.String(http.StatusOK, "wakemydyno")
 		handled = true
 	}
