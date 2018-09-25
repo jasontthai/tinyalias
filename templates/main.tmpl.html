@@ -31,15 +31,18 @@
 
     <script>
         var url = document.getElementById('url-id')
-        var clipboard = new ClipboardJS(url);
+        if (url != null) {
+            var clipboard = new ClipboardJS(url);
 
-        clipboard.on('success', function(e) {
-            document.getElementById("copied").innerText = "Copied!"
-            console.log(e);
-        });
-        clipboard.on('error', function(e) {
-            console.log(e);
-        });
+            clipboard.on('success', function(e) {
+                document.getElementById('copied').innerText = "Copied!"
+                console.log(e);
+            });
+            clipboard.on('error', function(e) {
+                console.log(e);
+            });
+        }
+
     </script>
 	</body>
 </html>
