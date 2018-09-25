@@ -190,7 +190,7 @@ func createURL(c *gin.Context, url, slug string) (string, error) {
 		}
 		shortened = baseUrl + urlObj.Slug
 	}
-	log.Info("Shortened URL generated: %v", shortened)
+	log.Info("Shortened URL generated: ", shortened)
 	return shortened, nil
 }
 
