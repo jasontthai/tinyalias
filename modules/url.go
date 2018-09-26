@@ -210,6 +210,17 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	slug := c.Param("slug")
 	var handled bool
 
+	if strings.Contains(c.Request.Host, "api") {
+		if slug == "create" {
+			APICreateURL(c)
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+			})
+		}
+		return true
+	}
+
 	if slug == "wakemydyno.txt" {
 		c.String(http.StatusOK, "wakemydyno")
 		handled = true
@@ -221,12 +232,6 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	if slug == "robots.txt" {
 		c.String(http.StatusOK, "User-agent: *")
 		handled = true
-	}
-	if slug == "create" {
-		if strings.Contains(c.Request.Host, "api") {
-			APICreateURL(c)
-			handled = true
-		}
 	}
 	return handled
 }
