@@ -66,14 +66,14 @@ func CreateURL(c *gin.Context) {
 func GetURL(c *gin.Context) {
 	db := middleware.GetDB(c)
 
+	if handled := handleSpecialRoutes(c); handled {
+		return
+	}
+
 	slug := c.Param("slug")
 	log.WithFields(log.Fields{
 		"slug": slug,
 	}).Info("Got SLUG")
-
-	if handled := handleSpecialRoutes(c); handled {
-		return
-	}
 
 	urlObj, err := pg.GetURL(db, "", slug)
 	if err != nil && err != sql.ErrNoRows {
