@@ -30,7 +30,7 @@ func main() {
 		log.Fatal("$DATABASE_URL must be set")
 	}
 
-	config := newrelic.NewConfig("tinyalias", os.Getenv("NEW_RELIC_LICENSE_KEY"))
+	config := newrelic.NewConfig(os.Getenv("APP_NAME"), os.Getenv("NEW_RELIC_LICENSE_KEY"))
 	app, err := newrelic.NewApplication(config)
 	if err != nil {
 		log.Fatal("error initializing new relic")
