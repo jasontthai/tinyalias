@@ -256,19 +256,25 @@ func GetAnalytics(c *gin.Context) {
 
 	strSlice := strings.Split(tinyURLStr, "/")
 	if len(strSlice) == 0 {
-		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{})
+		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
+			"error": "Invalid URL. Try again.",
+		})
 		return
 	}
 	slug := strSlice[len(strSlice)-1]
 	if slug == "" {
-		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{})
+		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
+			"error": "Invalid URL. Try again.",
+		})
 		return
 	}
 
 	url, err := pg.GetURL(db, "", slug)
 	if err != nil {
 		c.Error(err)
-		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{})
+		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
+			"error": "Invalid URL. Try again.",
+		})
 		return
 	}
 
