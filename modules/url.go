@@ -273,7 +273,7 @@ func GetAnalytics(c *gin.Context) {
 	}
 
 	var countryToCityToCityCount = make(map[string]map[string]int)
-	var analytics []models.Analytics
+	analytics := make([]models.Analytics, 0)
 
 	for _, accessIP := range url.AccessIPs {
 		ip := net.ParseIP(accessIP)
