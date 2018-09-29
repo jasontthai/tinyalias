@@ -21,6 +21,7 @@
             <h3>Number of clicks: {{ .count }}</h3>
         {{ end }}
         {{ if .analytics }}
+            <h3>Visits by Countries</h3>
             <ul class="list-group">
             {{ range .analytics}}
             <li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center">
