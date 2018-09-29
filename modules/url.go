@@ -31,6 +31,7 @@ func init() {
 const (
 	base          = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
 	NotFoundQuery = "not-found"
+	BaseURL       = "baseUrl"
 )
 
 func GetHomePage(c *gin.Context) {
@@ -46,8 +47,8 @@ func GetHomePage(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
-		"baseUrl": baseUrl,
-		"error":   error,
+		BaseURL: baseUrl,
+		"error": error,
 	})
 }
 
@@ -63,14 +64,14 @@ func CreateURL(c *gin.Context) {
 	if err != nil {
 		c.Error(err)
 		c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
-			"error":   "Oops. Something went wrong. Please try again.",
-			"baseUrl": baseUrl,
+			"error": "Oops. Something went wrong. Please try again.",
+			BaseURL: baseUrl,
 		})
 		return
 	}
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
-		"url":     shortened,
-		"baseUrl": baseUrl,
+		"url":   shortened,
+		BaseURL: baseUrl,
 	})
 }
 
@@ -248,7 +249,10 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	if slug == "analytics" {
 		GetAnalytics(c)
 		handled = true
-
+	}
+	if slug == "privacy-policy" {
+		c.HTML(http.StatusOK, "privacypolicy.tmpl.html", gin.H{})
+		handled = true
 	}
 	return handled
 }
@@ -259,7 +263,9 @@ func GetAnalytics(c *gin.Context) {
 
 	tinyURLStr := strings.TrimSpace(c.Query("url"))
 	if tinyURLStr == "" {
-		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{})
+		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
+			BaseURL: baseUrl,
+		})
 		return
 	}
 
@@ -267,6 +273,7 @@ func GetAnalytics(c *gin.Context) {
 	if len(strSlice) == 0 {
 		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
 			"error": "Invalid URL. Try again.",
+			BaseURL: baseUrl,
 		})
 		return
 	}
@@ -274,6 +281,7 @@ func GetAnalytics(c *gin.Context) {
 	if slug == "" {
 		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
 			"error": "Invalid URL. Try again.",
+			BaseURL: baseUrl,
 		})
 		return
 	}
@@ -283,6 +291,7 @@ func GetAnalytics(c *gin.Context) {
 		c.Error(err)
 		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
 			"error": "Invalid URL. Try again.",
+			BaseURL: baseUrl,
 		})
 		return
 	}
@@ -329,6 +338,7 @@ func GetAnalytics(c *gin.Context) {
 		"url":       tinyURLStr,
 		"count":     url.Counter,
 		"analytics": analytics,
+		BaseURL:     baseUrl,
 	})
 	return
 }
