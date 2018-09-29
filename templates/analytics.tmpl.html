@@ -18,9 +18,11 @@
             </form>
             {{ end }}
 
-        {{ if and .analytics .count .url }}
+        {{ if and .count .url }}
             <h2 class="text-center">Stats for {{ .url }}</h2>
             <h3>Number of clicks: {{ .count }}</h3>
+        {{ end }}
+        {{ if .analytics }}
             <ul class="list-group">
             {{ range .analytics}}
             <li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center">
