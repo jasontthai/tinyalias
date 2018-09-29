@@ -2,6 +2,7 @@ package modules
 
 import (
 	"database/sql"
+	"fmt"
 	"math/rand"
 	"net"
 	"net/http"
@@ -28,7 +29,8 @@ func init() {
 }
 
 const (
-	base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
+	base          = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
+	NotFoundQuery = "not-found"
 )
 
 func GetHomePage(c *gin.Context) {
@@ -37,8 +39,15 @@ func GetHomePage(c *gin.Context) {
 		return
 	}
 
+	notFoundQuery := c.Query(NotFoundQuery)
+	var error string
+	if notFoundQuery != "" {
+		error = "The link you entered doesn't exist. Fancy creating one?"
+	}
+
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
 		"baseUrl": baseUrl,
+		"error":   error,
 	})
 }
 
@@ -94,7 +103,7 @@ func Get(c *gin.Context) {
 		c.Redirect(http.StatusFound, urlObj.Url)
 		return
 	}
-	c.Redirect(http.StatusFound, baseUrl)
+	c.Redirect(http.StatusFound, fmt.Sprintf("/?%v=%v", NotFoundQuery, slug))
 	return
 }
 
