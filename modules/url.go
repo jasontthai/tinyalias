@@ -233,11 +233,6 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		}
 		return true
 	}
-
-	if slug == "wakemydyno.txt" {
-		c.String(http.StatusOK, "wakemydyno")
-		handled = true
-	}
 	if slug == "favicon.ico" {
 		c.File("./static/favicon.ico")
 		handled = true
