@@ -42,11 +42,12 @@ func main() {
 	router.LoadHTMLGlob("templates/*.tmpl.html")
 	//router.Static("/static", "static")
 	router.Use(middleware.Database(database))
+	router.Use(middleware.GeoIP())
 	router.Use(nrgin.Middleware(app))
 
 	router.GET("", modules.GetHomePage)
 	router.POST("", modules.CreateURL)
-	router.GET("/:slug", modules.GetURL)
+	router.GET("/:slug", modules.Get)
 
 	router.Run(":" + port)
 }

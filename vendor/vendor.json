@@ -174,6 +174,18 @@
 			"revisionTime": "2018-08-28T16:38:49Z"
 		},
 		{
+			"checksumSHA1": "GSadhwjiMi8zISYoyC1arYREbKE=",
+			"path": "github.com/oschwald/geoip2-golang",
+			"revision": "7118115686e16b77967cdbf55d1b944fe14ad312",
+			"revisionTime": "2018-02-22T21:45:52Z"
+		},
+		{
+			"checksumSHA1": "a1WxG0wMDGFnjojQghwu1i1SDhk=",
+			"path": "github.com/oschwald/maxminddb-golang",
+			"revision": "277d39ecb83edd90f26a1fb450ab7e710faa203f",
+			"revisionTime": "2018-08-19T23:01:43Z"
+		},
+		{
 			"checksumSHA1": "mVse81rphxcTRDHBRG1fZnfwJ8w=",
 			"path": "github.com/sirupsen/logrus",
 			"revision": "f3df9aeffda7c12bd9f5a03f9251d75d35993165",

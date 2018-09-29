@@ -3,8 +3,10 @@ package modules
 import (
 	"database/sql"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -63,7 +65,7 @@ func CreateURL(c *gin.Context) {
 	})
 }
 
-func GetURL(c *gin.Context) {
+func Get(c *gin.Context) {
 	db := middleware.GetDB(c)
 
 	if handled := handleSpecialRoutes(c); handled {
@@ -83,6 +85,7 @@ func GetURL(c *gin.Context) {
 	if urlObj != nil {
 
 		urlObj.Counter += 1
+		urlObj.AccessIPs = append(urlObj.AccessIPs, c.ClientIP())
 		err = pg.UpdateURL(db, urlObj)
 		if err != nil {
 			c.Error(err)
@@ -233,5 +236,78 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		c.String(http.StatusOK, "User-agent: *")
 		handled = true
 	}
+	if slug == "analytics" {
+		GetAnalytics(c)
+		handled = true
+
+	}
 	return handled
+}
+
+func GetAnalytics(c *gin.Context) {
+	db := middleware.GetDB(c)
+	geoIP := middleware.GetGeoIP(c)
+
+	tinyURLStr := strings.TrimSpace(c.Query("url"))
+	if tinyURLStr == "" {
+		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{})
+		return
+	}
+
+	strSlice := strings.Split(tinyURLStr, "/")
+	if len(strSlice) == 0 {
+		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{})
+		return
+	}
+	slug := strSlice[len(strSlice)-1]
+	if slug == "" {
+		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{})
+		return
+	}
+
+	url, err := pg.GetURL(db, "", slug)
+	if err != nil {
+		c.Error(err)
+		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{})
+		return
+	}
+
+	var countryToCityToCityCount = make(map[string]map[string]int)
+	var analytics []models.Analytics
+
+	for _, accessIP := range url.AccessIPs {
+		ip := net.ParseIP(accessIP)
+		record, err := geoIP.City(ip)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"ip":   ip,
+				"slug": url.Slug,
+			}).WithError(err).Error("Error getting Geo Info")
+			continue
+		}
+		country := record.Country.Names["en"]
+		if _, ok := countryToCityToCityCount[country]; !ok {
+			countryToCityToCityCount[country] = make(map[string]int)
+		}
+		countryToCityToCityCount[country][record.City.Names["en"]] += 1
+	}
+	for country, cityMap := range countryToCityToCityCount {
+		for city, count := range cityMap {
+			analytics = append(analytics, models.Analytics{
+				Country: country,
+				City:    city,
+				Count:   count,
+			})
+		}
+	}
+
+	// sort in descending order of count
+	sort.Slice(analytics, func(i, j int) bool { return analytics[i].Count > analytics[j].Count })
+
+	c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
+		"url":       tinyURLStr,
+		"count":     url.Counter,
+		"analytics": analytics,
+	})
+	return
 }

@@ -1,14 +1,17 @@
 package pg
 
 import (
+	"database/sql"
+
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"github.com/zirius/url-shortener/models"
 )
 
 func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Select("url, slug, ip, counter, created, updated").
+	sb := psql.Select("url, slug, ip, counter, created, updated, access_ips").
 		From("urls")
 	if longUrl != "" {
 		sb = sb.Where(squirrel.Eq{"url": longUrl})
@@ -16,21 +19,33 @@ func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 	if slug != "" {
 		sb = sb.Where(squirrel.Eq{"slug": slug})
 	}
+
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
 		return nil, err
 	}
 
-	var url models.URL
-	if err = db.Get(&url, sqlStr, args...); err != nil {
+	rows, err := db.Queryx(sqlStr, args...)
+	if err != nil {
 		return nil, err
 	}
-	return &url, nil
+	defer rows.Close()
+
+	if rows.Next() {
+		var url models.URL
+		var accessIPs []string
+		if err := rows.Scan(&url.Url, &url.Slug, &url.IP, &url.Counter, &url.Created, &url.Updated, pq.Array(&accessIPs)); err != nil {
+			return nil, err
+		}
+		url.AccessIPs = accessIPs
+		return &url, nil
+	}
+	return nil, sql.ErrNoRows
 }
 
 func GetURLs(db *sqlx.DB) ([]models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Select("url, slug, ip, counter, created, updated").
+	sb := psql.Select("url, slug, ip, counter, created, updated, access_ips").
 		From("urls").OrderBy("created desc")
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
@@ -38,8 +53,21 @@ func GetURLs(db *sqlx.DB) ([]models.URL, error) {
 	}
 
 	var urls []models.URL
-	if err = db.Select(&urls, sqlStr, args...); err != nil {
+
+	rows, err := db.Queryx(sqlStr, args...)
+	if err != nil {
 		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var url models.URL
+		var accessIPs []string
+		if err := rows.Scan(&url.Url, &url.Slug, &url.IP, &url.Counter, &url.Created, &url.Updated, pq.Array(accessIPs)); err != nil {
+			return nil, err
+		}
+		url.AccessIPs = accessIPs
+		urls = append(urls, url)
 	}
 	return urls, nil
 }
@@ -62,6 +90,7 @@ func UpdateURL(db *sqlx.DB, url *models.URL) error {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	clauses := make(map[string]interface{})
 	clauses["counter"] = url.Counter
+	clauses["access_ips"] = pq.Array(url.AccessIPs)
 	sb := psql.Update("urls").SetMap(clauses).Where(squirrel.Eq{"url": url.Url})
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {

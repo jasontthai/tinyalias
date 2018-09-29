@@ -15,3 +15,6 @@ ALTER TABLE urls
 CREATE INDEX idx_url ON urls USING btree (url);
 CREATE INDEX idx_slug ON urls USING btree (slug);
 CREATE INDEX idx_counter ON urls USING btree (counter);
+
+ALTER TABLE urls
+    ADD COLUMN access_ips character varying[];
