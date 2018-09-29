@@ -1,7 +1,32 @@
 <!doctype html>
 <html lang="en">
 	{{template "header.tmpl.html"}}
-	<body class="jumbotron vertical-center">
+	<body class="jumbotron bg-dark">
+
+        <div class="container">
+        <nav class="navbar navbar-expand-sm navbar-dark">
+
+                <a class="navbar-brand mb-0 h1" href="/">TinyAlias</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/analytics">Analytics</a>
+                        </li>
+                    </ul>
+                </div>
+        </nav>
+        </div>
+
+        <div class="my-5 col-md-12">
+        </div>
+
         <div class="container">
             <form method="POST">
                 <div class="input-group mb-3">
@@ -24,7 +49,12 @@
                 <h1 style="word-wrap: break-word"> <a style="color:white" id="url-id" href="#" data-clipboard-text={{.url}}>{{.url}}</a> <span id="copied"></span></h1>
             {{ end }}
             {{ if .error }}
-                <h1 style="color:red">  {{.error}} </h1>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ .error }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
             {{ end }}
             <span><a style="color: #e9831a" href="/analytics">Got Links? Get Your Statistics Here</a></span>
         </div>
