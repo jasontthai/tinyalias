@@ -304,6 +304,12 @@ func GetAnalytics(c *gin.Context) {
 	// sort in descending order of count
 	sort.Slice(analytics, func(i, j int) bool { return analytics[i].Count > analytics[j].Count })
 
+	log.WithFields(log.Fields{
+		"url":       tinyURLStr,
+		"count":     url.Counter,
+		"analytics": analytics,
+	}).Info("Returned values")
+
 	c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
 		"url":       tinyURLStr,
 		"count":     url.Counter,

@@ -3,7 +3,6 @@
     {{template "header.tmpl.html"}}
     <body class="jumbotron vertical-center">
         <div class="container">
-            {{ if not .url }}
             <h2>Enter TinyAlias Link to Get Stats</h2>
             <form method="GET">
                 <div class="input-group mb-3">
@@ -16,9 +15,8 @@
                     </div>
                 </div>
             </form>
-            {{ end }}
 
-        {{ if and .count .url }}
+        {{ if .url }}
             <h2 class="text-center">Stats for {{ .url }}</h2>
             <h3>Number of clicks: {{ .count }}</h3>
         {{ end }}
