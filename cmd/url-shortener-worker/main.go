@@ -47,10 +47,15 @@ func RunJob(j *que.Job) error {
 		}).WithError(err).Error("Error Getting Geo Info")
 	}
 
+	var state string
+	if len(record.Subdivisions) != 0 {
+		state = record.Subdivisions[0].Names["en"]
+	}
+
 	if err = pg.UpsertURLStat(db, &models.URLStat{
 		Slug:    slug,
 		Country: record.Country.Names["en"],
-		City:    record.City.Names["en"],
+		State:   state,
 		Counter: 1,
 		Created: time.Now(),
 	}); err != nil {
