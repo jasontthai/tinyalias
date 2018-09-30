@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/bgentry/que-go"
 	"github.com/jmoiron/sqlx"
@@ -52,6 +53,7 @@ func RunJob(j *que.Job) error {
 		City:    record.City.Names["en"],
 		IP:      request.IP,
 		Counter: 1,
+		Created: time.Now(),
 	}); err != nil {
 		log.WithFields(log.Fields{
 			"ip":   ip,
