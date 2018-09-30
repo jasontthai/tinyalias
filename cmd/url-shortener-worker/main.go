@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/bgentry/que-go"
+	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/jmoiron/sqlx"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/pkg/errors"
