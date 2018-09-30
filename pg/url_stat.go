@@ -44,7 +44,7 @@ func UpsertURLStat(db *sqlx.DB, stat *models.URLStat) error {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	sb := psql.Insert("url_stats").Columns("slug, country, city, ip, counter, properties, created, updated").Values(
 		stat.Slug, stat.Country, stat.City, stat.IP, stat.Counter, stat.Properties, stat.Created, stat.Updated).
-		Suffix(`ON CONFLICT ON CONSTRAINT url_stats_pkey DO UPDATE SET counter = url_stats.counter + 1, updated = NOW()`)
+		Suffix(`ON CONFLICT ON CONSTRAINT urls_stats_slug_ip_pkey DO UPDATE SET counter = url_stats.counter + 1, updated = NOW()`)
 
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {

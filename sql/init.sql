@@ -26,12 +26,15 @@ CREATE TABLE IF NOT EXISTS url_stats (
   slug text NOT NULL,
   country text NOT NULL DEFAULT '',
   city text NOT NULL DEFAULT '',
-  ip text NOT NULL PRIMARY KEY,
+  ip text NOT NULL,
   counter int NOT NULL DEFAULT 0,
   properties jsonb NOT NULL DEFAULT '{}'::jsonb,
   created timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated timestamp without time zone
 );
+
+ALTER TABLE url_stats
+  ADD CONSTRAINT urls_stats_slug_ip_pkey UNIQUE (slug, ip);
 
 CREATE INDEX idx_url_stats_slug ON url_stats USING btree (slug);
 CREATE INDEX idx_url_stats_country ON url_stats USING btree (country);
