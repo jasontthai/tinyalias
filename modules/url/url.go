@@ -1,4 +1,4 @@
-package modules
+package url
 
 import (
 	"database/sql"
@@ -15,6 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/zirius/url-shortener/middleware"
 	"github.com/zirius/url-shortener/models"
+	"github.com/zirius/url-shortener/modules/queue"
 	"github.com/zirius/url-shortener/pg"
 )
 
@@ -63,7 +64,7 @@ func CreateURL(c *gin.Context) {
 	shortened, err := createURL(c, url, slug)
 	if err != nil {
 		c.Error(err)
-		c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+		c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
 			"error": "Oops. Something went wrong. Please try again.",
 			BaseURL: baseUrl,
 		})
@@ -77,6 +78,7 @@ func CreateURL(c *gin.Context) {
 
 func Get(c *gin.Context) {
 	db := middleware.GetDB(c)
+	_, qc := middleware.GetQue(c)
 
 	if handled := handleSpecialRoutes(c); handled {
 		return
@@ -99,6 +101,18 @@ func Get(c *gin.Context) {
 		err = pg.UpdateURL(db, urlObj)
 		if err != nil {
 			c.Error(err)
+		}
+
+		log.Debug("Dispatching job")
+		// Dispatch ParseGeoRequestJob
+		if err := queue.Dispatch(qc, queue.ParseGeoRequest{
+			Slug: slug,
+			IP:   c.ClientIP(),
+		}); err != nil {
+			log.WithFields(log.Fields{
+				"slug": slug,
+				"ip":   c.ClientIP(),
+			}).WithError(err).Error("error sending queue job")
 		}
 
 		c.Redirect(http.StatusFound, urlObj.Url)
