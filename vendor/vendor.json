@@ -1,5 +1,10 @@
 {
 	"comment": "",
+	"heroku": {
+		"install": [
+			"./cmd/..."
+		]
+	},
 	"ignore": "test",
 	"package": [
 		{
@@ -7,6 +12,12 @@
 			"path": "github.com/Masterminds/squirrel",
 			"revision": "e13dbacee404686afd0acf2d44b8d34869605e03",
 			"revisionTime": "2015-03-02T16:50:45Z"
+		},
+		{
+			"checksumSHA1": "Fx9xMI58lpBwwaGTxsI5rKeX3xw=",
+			"path": "github.com/bgentry/que-go",
+			"revision": "04623be4201ec7abb8d6cd0f172a4c612e216cc4",
+			"revisionTime": "2018-02-08T22:57:42Z"
 		},
 		{
 			"checksumSHA1": "QeKwBtN2df+j+4stw3bQJ6yO4EY=",
@@ -64,6 +75,42 @@
 			"path": "github.com/heroku/x/hmetrics/onload",
 			"revision": "1de401e1ba0e5db3e5c15d2faeee777e0b685700",
 			"revisionTime": "2018-07-19T22:16:34Z"
+		},
+		{
+			"checksumSHA1": "mTOX95mjIovKITjQKPP+EkYjsvk=",
+			"path": "github.com/jackc/pgx",
+			"revision": "0b00887bf8e110d6e02e9e82c066cc616bc0ed71",
+			"revisionTime": "2018-09-22T20:34:18Z"
+		},
+		{
+			"checksumSHA1": "rsDmBQ/jGFUN2t6G4c3ohkKGKdQ=",
+			"path": "github.com/jackc/pgx/chunkreader",
+			"revision": "0b00887bf8e110d6e02e9e82c066cc616bc0ed71",
+			"revisionTime": "2018-09-22T20:34:18Z"
+		},
+		{
+			"checksumSHA1": "wArf/u0cmHsLafG2tOcjVUUXQBw=",
+			"path": "github.com/jackc/pgx/internal/sanitize",
+			"revision": "0b00887bf8e110d6e02e9e82c066cc616bc0ed71",
+			"revisionTime": "2018-09-22T20:34:18Z"
+		},
+		{
+			"checksumSHA1": "OCtOmvS8BLHQAyQXJ/Ub8QxKz0s=",
+			"path": "github.com/jackc/pgx/pgio",
+			"revision": "0b00887bf8e110d6e02e9e82c066cc616bc0ed71",
+			"revisionTime": "2018-09-22T20:34:18Z"
+		},
+		{
+			"checksumSHA1": "O2maVT2McrV62SKrIXqZh7gHEoM=",
+			"path": "github.com/jackc/pgx/pgproto3",
+			"revision": "0b00887bf8e110d6e02e9e82c066cc616bc0ed71",
+			"revisionTime": "2018-09-22T20:34:18Z"
+		},
+		{
+			"checksumSHA1": "fFUF5XbI8Gx63ZQPn8gFmRnK+is=",
+			"path": "github.com/jackc/pgx/pgtype",
+			"revision": "0b00887bf8e110d6e02e9e82c066cc616bc0ed71",
+			"revisionTime": "2018-09-22T20:34:18Z"
 		},
 		{
 			"checksumSHA1": "F45m6rdNc9pgzu5vWN1n1Rwbk4A=",
@@ -184,6 +231,12 @@
 			"path": "github.com/oschwald/maxminddb-golang",
 			"revision": "277d39ecb83edd90f26a1fb450ab7e710faa203f",
 			"revisionTime": "2018-08-19T23:01:43Z"
+		},
+		{
+			"checksumSHA1": "18YrywDvb67HU8xYF5vqKMgelx0=",
+			"path": "github.com/pkg/errors",
+			"revision": "c059e472caf75dbe73903f6521a20abac245b17f",
+			"revisionTime": "2018-09-11T06:21:13Z"
 		},
 		{
 			"checksumSHA1": "mVse81rphxcTRDHBRG1fZnfwJ8w=",

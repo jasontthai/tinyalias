@@ -10,7 +10,8 @@ import (
 	"github.com/newrelic/go-agent/_integrations/nrgin/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/zirius/url-shortener/middleware"
-	"github.com/zirius/url-shortener/modules"
+	"github.com/zirius/url-shortener/modules/queue"
+	"github.com/zirius/url-shortener/modules/url"
 )
 
 func init() {
@@ -36,6 +37,12 @@ func main() {
 		log.Fatal("error initializing new relic")
 	}
 
+	pgxpool, qc, err := queue.Setup(database)
+	if err != nil {
+		log.Fatal("error initializing que-go")
+	}
+	defer pgxpool.Close()
+
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -43,11 +50,12 @@ func main() {
 	//router.Static("/static", "static")
 	router.Use(middleware.Database(database))
 	router.Use(middleware.GeoIP())
+	router.Use(middleware.Que(pgxpool, qc))
 	router.Use(nrgin.Middleware(app))
 
-	router.GET("", modules.GetHomePage)
-	router.POST("", modules.CreateURL)
-	router.GET("/:slug", modules.Get)
+	router.GET("", url.GetHomePage)
+	router.POST("", url.CreateURL)
+	router.GET("/:slug", url.Get)
 
 	router.Run(":" + port)
 }
