@@ -8,14 +8,18 @@ import (
 	"syscall"
 
 	"github.com/bgentry/que-go"
+	"github.com/jmoiron/sqlx"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/zirius/url-shortener/models"
 	"github.com/zirius/url-shortener/modules/queue"
+	"github.com/zirius/url-shortener/pg"
 )
 
 var (
-	db *geoip2.Reader
+	reader *geoip2.Reader
+	db     *sqlx.DB
 )
 
 func init() {
@@ -31,38 +35,56 @@ func RunJob(j *que.Job) error {
 	}
 
 	log.WithField("ParseGeoRequest", request).Info("Processing ParseGeoRequest!")
-	// You would do real work here...
 
 	ip := net.ParseIP(request.IP)
 	slug := request.Slug
-	record, err := db.City(ip)
+	record, err := reader.City(ip)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"ip":   ip,
 			"slug": slug,
-		}).WithError(err).Error("Error getting Geo Info")
+		}).WithError(err).Error("Error Getting Geo Info")
 	}
-	log.Info("Determined location: ", record.Country.Names["en"])
+
+	if err = pg.UpsertURLStat(db, &models.URLStat{
+		Slug:    slug,
+		Country: record.Country.Names["en"],
+		City:    record.City.Names["en"],
+		IP:      request.IP,
+		Counter: 1,
+	}); err != nil {
+		log.WithFields(log.Fields{
+			"ip":   ip,
+			"slug": slug,
+		}).WithError(err).Error("Error Saving Geo Info")
+	}
 
 	return nil
 }
 
 func main() {
-	database := os.Getenv("DATABASE_URL")
-	if database == "" {
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
 		log.Fatal("$DATABASE_URL must be set")
 	}
 
-	pgxpool, qc, err := queue.Setup(database)
+	pgxpool, qc, err := queue.Setup(databaseURL)
 	if err != nil {
 		log.Fatal("error initializing que-go")
 	}
 	defer pgxpool.Close()
 
-	db, err = geoip2.Open("static/GeoLite2-City.mmdb")
+	reader, err = geoip2.Open("static/GeoLite2-City.mmdb")
 	if err != nil {
 		log.Fatal("error initializing geoip2")
 	}
+	defer reader.Close()
+
+	db, err = sqlx.Open("postgres", databaseURL)
+	if err != nil {
+		log.Fatal("error initializing postgres")
+	}
+	defer db.Close()
 
 	wm := que.WorkMap{
 		queue.ParseGeoRequestJob: RunJob,

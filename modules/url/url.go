@@ -103,7 +103,7 @@ func Get(c *gin.Context) {
 			c.Error(err)
 		}
 
-		log.Info("Dispatching job")
+		log.Debug("Dispatching job")
 		// Dispatch ParseGeoRequestJob
 		if err := queue.Dispatch(qc, queue.ParseGeoRequest{
 			Slug: slug,

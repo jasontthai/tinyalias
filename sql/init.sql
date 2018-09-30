@@ -21,3 +21,18 @@ CREATE INDEX idx_counter ON urls USING btree (counter);
 
 ALTER TABLE urls
   ADD COLUMN access_ips character varying[];
+
+CREATE TABLE IF NOT EXISTS url_stats (
+  slug text NOT NULL,
+  country text NOT NULL DEFAULT '',
+  city text NOT NULL DEFAULT '',
+  ip text NOT NULL PRIMARY KEY,
+  counter int NOT NULL DEFAULT 0,
+  properties jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated timestamp without time zone
+);
+
+CREATE INDEX idx_url_stats_slug ON url_stats USING btree (slug);
+CREATE INDEX idx_url_stats_country ON url_stats USING btree (country);
+CREATE INDEX idx_url_stats_city ON url_stats USING btree (city);
