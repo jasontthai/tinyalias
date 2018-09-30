@@ -68,8 +68,8 @@ func main() {
 		queue.ParseGeoRequestJob: RunJob,
 	}
 
-	// 2 worker go routines
-	workers := que.NewWorkerPool(qc, wm, 2)
+	// 1 worker go routine
+	workers := que.NewWorkerPool(qc, wm, 1)
 
 	// Catch signal so we can shutdown gracefully
 	sigCh := make(chan os.Signal)
