@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/bgentry/que-go"
+	"github.com/google/safebrowsing"
 	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/jmoiron/sqlx"
 	"github.com/oschwald/geoip2-golang"
@@ -30,7 +31,7 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
-func RunJob(j *que.Job) error {
+func RunParseGeoRequestJob(j *que.Job) error {
 	var request queue.ParseGeoRequest
 	if err := json.Unmarshal(j.Args, &request); err != nil {
 		return errors.Wrap(err, "Unable to unmarshal job arguments into ParseGeoRequest: "+string(j.Args))
@@ -69,6 +70,45 @@ func RunJob(j *que.Job) error {
 	return nil
 }
 
+func RunDetectSpamJob(j *que.Job) error {
+	sb, err := safebrowsing.NewSafeBrowser(safebrowsing.Config{
+		APIKey: os.Getenv("GOOGLE_API_KEY"),
+	})
+	if err != nil {
+		return err
+	}
+
+	clauses := make(map[string]interface{})
+	clauses["status"] = "active"
+	urls, err := pg.GetURLs(db, clauses)
+	if err != nil {
+		return err
+	}
+
+	var urlStr []string
+	for _, url := range urls {
+		urlStr = append(urlStr, url.Url)
+	}
+
+	threats, err := sb.LookupURLs(urlStr)
+	if err != nil {
+		return err
+	}
+
+	for i, url := range urls {
+		if len(threats[i]) > 0 {
+			// Detected link as threat - only need to get the first threat type
+			url.Status = threats[i][0].ThreatType.String()
+			err = pg.UpdateURL(db, &url)
+			if err != nil {
+				log.WithError(err).Error("Error updating url")
+			}
+		}
+	}
+
+	return nil
+}
+
 func main() {
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
@@ -94,7 +134,8 @@ func main() {
 	defer db.Close()
 
 	wm := que.WorkMap{
-		queue.ParseGeoRequestJob: RunJob,
+		queue.ParseGeoRequestJob: RunParseGeoRequestJob,
+		queue.DetectSpamJob:      RunDetectSpamJob,
 	}
 
 	// 1 worker go routine

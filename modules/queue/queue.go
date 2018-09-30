@@ -10,6 +10,7 @@ import (
 
 const (
 	ParseGeoRequestJob = "ParseGeoRequestJob"
+	DetectSpamJob      = "DetectSpamJob"
 )
 
 type ParseGeoRequest struct {
@@ -17,7 +18,7 @@ type ParseGeoRequest struct {
 	Slug string `json:"slug"`
 }
 
-func Dispatch(qc *que.Client, request ParseGeoRequest) error {
+func DispatchParseGeoRequestJob(qc *que.Client, request ParseGeoRequest) error {
 	enc, err := json.Marshal(request)
 	if err != nil {
 		return errors.Wrap(err, "Marshalling the IndexRequest")
@@ -26,6 +27,15 @@ func Dispatch(qc *que.Client, request ParseGeoRequest) error {
 	j := que.Job{
 		Type: ParseGeoRequestJob,
 		Args: enc,
+	}
+
+	return errors.Wrap(qc.Enqueue(&j), "Enqueueing Job")
+}
+
+func DispatchDetectSpamJob(qc *que.Client) error {
+	j := que.Job{
+		Type: DetectSpamJob,
+		Args: nil,
 	}
 
 	return errors.Wrap(qc.Enqueue(&j), "Enqueueing Job")

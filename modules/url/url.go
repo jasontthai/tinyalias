@@ -31,7 +31,8 @@ func init() {
 const (
 	base          = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
 	NotFoundQuery = "not-found"
-	SpammedQuery  = "spammed"
+	ThreatQuery   = "threat"
+	SlugQuery     = "slug"
 	BaseURL       = "baseUrl"
 )
 
@@ -47,9 +48,9 @@ func GetHomePage(c *gin.Context) {
 		error = "The link you entered doesn't exist. Fancy creating one?"
 	}
 
-	spammedQuery := c.Query(SpammedQuery)
-	if spammedQuery != "" {
-		error = "The link is detected as spam."
+	threatQuery := c.Query(ThreatQuery)
+	if threatQuery != "" {
+		error = fmt.Sprintf("The link is detected as unsafe. Reason: %s", threatQuery)
 	}
 
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
@@ -102,8 +103,8 @@ func Get(c *gin.Context) {
 	if urlObj != nil {
 
 		// return spammed
-		if urlObj.Status == "spammed" {
-			c.Redirect(http.StatusFound, fmt.Sprintf("?%v=%v", SpammedQuery, slug))
+		if urlObj.Status != "active" {
+			c.Redirect(http.StatusFound, fmt.Sprintf("?%v=%v&%v=%v", ThreatQuery, urlObj.Status, SlugQuery, slug))
 			return
 		}
 
@@ -116,7 +117,7 @@ func Get(c *gin.Context) {
 
 		log.Debug("Dispatching job")
 		// Dispatch ParseGeoRequestJob
-		if err := queue.Dispatch(qc, queue.ParseGeoRequest{
+		if err := queue.DispatchParseGeoRequestJob(qc, queue.ParseGeoRequest{
 			Slug: slug,
 			IP:   c.ClientIP(),
 		}); err != nil {
@@ -168,7 +169,9 @@ func APIGetURL(c *gin.Context) {
 	}
 
 	db := middleware.GetDB(c)
-	urls, err := pg.GetURLs(db)
+
+	clauses := make(map[string]interface{})
+	urls, err := pg.GetURLs(db, clauses)
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{

@@ -43,10 +43,23 @@ func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 	return nil, sql.ErrNoRows
 }
 
-func GetURLs(db *sqlx.DB) ([]models.URL, error) {
+func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	sb := psql.Select("url, slug, ip, counter, created, updated, access_ips, status").
 		From("urls").OrderBy("created desc")
+
+	if slug, ok := clauses["slug"].(string); ok {
+		sb = sb.Where(squirrel.Eq{"slug": slug})
+	}
+
+	if url, ok := clauses["url"].(string); ok {
+		sb = sb.Where(squirrel.Eq{"url": url})
+	}
+
+	if status, ok := clauses["status"].(string); ok {
+		sb = sb.Where(squirrel.Eq{"status": status})
+	}
+
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
 		return nil, err
@@ -91,6 +104,7 @@ func UpdateURL(db *sqlx.DB, url *models.URL) error {
 	clauses := make(map[string]interface{})
 	clauses["counter"] = url.Counter
 	clauses["access_ips"] = pq.Array(url.AccessIPs)
+	clauses["status"] = url.Status
 	sb := psql.Update("urls").SetMap(clauses).Where(squirrel.Eq{"url": url.Url})
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
