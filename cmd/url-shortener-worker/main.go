@@ -51,7 +51,6 @@ func RunJob(j *que.Job) error {
 		Slug:    slug,
 		Country: record.Country.Names["en"],
 		City:    record.City.Names["en"],
-		IP:      request.IP,
 		Counter: 1,
 		Created: time.Now(),
 	}); err != nil {

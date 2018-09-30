@@ -59,7 +59,7 @@ func CreateURL(c *gin.Context) {
 	log.WithFields(log.Fields{
 		"url":  url,
 		"slug": slug,
-	}).Info("Got Post Form")
+	}).Debug("Got Post Form")
 
 	shortened, err := createURL(c, url, slug)
 	if err != nil {
@@ -87,7 +87,7 @@ func Get(c *gin.Context) {
 	slug := c.Param("slug")
 	log.WithFields(log.Fields{
 		"slug": slug,
-	}).Info("Got SLUG")
+	}).Debug("Got SLUG")
 
 	urlObj, err := pg.GetURL(db, "", slug)
 	if err != nil && err != sql.ErrNoRows {
@@ -217,7 +217,10 @@ func createURL(c *gin.Context, url, slug string) (string, error) {
 		}
 		shortened = baseUrl + urlObj.Slug
 	}
-	log.Info("Shortened URL generated: ", shortened)
+	log.WithFields(log.Fields{
+		"short":    shortened,
+		"original": url,
+	}).Info("Shortened URL generated")
 	return shortened, nil
 }
 
