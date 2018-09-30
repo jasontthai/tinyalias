@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"math/rand"
-	"net"
 	"net/http"
 	"os"
 	"sort"
@@ -271,7 +270,6 @@ func handleSpecialRoutes(c *gin.Context) bool {
 
 func GetAnalytics(c *gin.Context) {
 	db := middleware.GetDB(c)
-	geoIP := middleware.GetGeoIP(c)
 
 	tinyURLStr := strings.TrimSpace(c.Query("url"))
 	if tinyURLStr == "" {
@@ -298,7 +296,9 @@ func GetAnalytics(c *gin.Context) {
 		return
 	}
 
-	url, err := pg.GetURL(db, "", slug)
+	stats, err := pg.GetURLStats(db, map[string]interface{}{
+		"slug": slug,
+	})
 	if err != nil {
 		c.Error(err)
 		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
@@ -308,33 +308,16 @@ func GetAnalytics(c *gin.Context) {
 		return
 	}
 
-	var countryToCityToCityCount = make(map[string]map[string]int)
+	var counter int
 	analytics := make([]models.Analytics, 0)
 
-	for _, accessIP := range url.AccessIPs {
-		ip := net.ParseIP(accessIP)
-		record, err := geoIP.City(ip)
-		if err != nil {
-			log.WithFields(log.Fields{
-				"ip":   ip,
-				"slug": url.Slug,
-			}).WithError(err).Error("Error getting Geo Info")
-			continue
-		}
-		country := record.Country.Names["en"]
-		if _, ok := countryToCityToCityCount[country]; !ok {
-			countryToCityToCityCount[country] = make(map[string]int)
-		}
-		countryToCityToCityCount[country][record.City.Names["en"]] += 1
-	}
-	for country, cityMap := range countryToCityToCityCount {
-		for city, count := range cityMap {
-			analytics = append(analytics, models.Analytics{
-				Country: country,
-				City:    city,
-				Count:   count,
-			})
-		}
+	for _, stat := range stats {
+		counter += stat.Counter
+		analytics = append(analytics, models.Analytics{
+			Country: stat.Country,
+			State:   stat.State,
+			Count:   stat.Counter,
+		})
 	}
 
 	// sort in descending order of count
@@ -342,13 +325,13 @@ func GetAnalytics(c *gin.Context) {
 
 	log.WithFields(log.Fields{
 		"url":       tinyURLStr,
-		"count":     url.Counter,
+		"count":     counter,
 		"analytics": analytics,
 	}).Info("Returned values")
 
 	c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
 		"url":       tinyURLStr,
-		"count":     url.Counter,
+		"count":     counter,
 		"analytics": analytics,
 		BaseURL:     baseUrl,
 	})

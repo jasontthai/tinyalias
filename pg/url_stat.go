@@ -6,7 +6,7 @@ import (
 	"github.com/zirius/url-shortener/models"
 )
 
-func GetURLAccess(db *sqlx.DB, clauses map[string]interface{}) ([]models.URLStat, error) {
+func GetURLStats(db *sqlx.DB, clauses map[string]interface{}) ([]models.URLStat, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	sb := psql.Select("*").
 		From("url_stats").OrderBy("created desc")

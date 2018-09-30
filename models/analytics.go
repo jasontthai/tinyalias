@@ -1,7 +1,7 @@
 package models
 
 type Analytics struct {
-	City    string `json:"city"`
+	State   string `json:"state"`
 	Country string `json:"country"`
 	Count   int    `json:"count"`
 }
