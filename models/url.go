@@ -14,4 +14,5 @@ type URL struct {
 	Created   time.Time `json:"created" db:"created"`
 	Updated   null.Time `json:"updated" db:"updated"`
 	AccessIPs []string  `json:"access_ips" db:"access_ips"`
+	Status    string    `json:"status" db:"status"`
 }

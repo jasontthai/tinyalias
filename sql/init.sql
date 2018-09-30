@@ -22,6 +22,9 @@ CREATE INDEX idx_counter ON urls USING btree (counter);
 ALTER TABLE urls
   ADD COLUMN access_ips character varying[];
 
+ALTER TABLE urls
+  ADD COLUMN status text NOT NULL DEFAULT 'active';
+
 CREATE TABLE IF NOT EXISTS url_stats (
   slug text NOT NULL,
   country text NOT NULL DEFAULT '',

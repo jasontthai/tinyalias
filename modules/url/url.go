@@ -31,6 +31,7 @@ func init() {
 const (
 	base          = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
 	NotFoundQuery = "not-found"
+	SpammedQuery  = "spammed"
 	BaseURL       = "baseUrl"
 )
 
@@ -44,6 +45,11 @@ func GetHomePage(c *gin.Context) {
 	var error string
 	if notFoundQuery != "" {
 		error = "The link you entered doesn't exist. Fancy creating one?"
+	}
+
+	spammedQuery := c.Query(SpammedQuery)
+	if spammedQuery != "" {
+		error = "The link is detected as spam."
 	}
 
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
@@ -94,6 +100,12 @@ func Get(c *gin.Context) {
 	}
 
 	if urlObj != nil {
+
+		// return spammed
+		if urlObj.Status == "spammed" {
+			c.Redirect(http.StatusFound, fmt.Sprintf("?%v=%v", SpammedQuery, slug))
+			return
+		}
 
 		urlObj.Counter += 1
 		urlObj.AccessIPs = append(urlObj.AccessIPs, c.ClientIP())

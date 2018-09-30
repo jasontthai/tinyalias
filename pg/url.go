@@ -11,7 +11,7 @@ import (
 
 func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Select("url, slug, ip, counter, created, updated, access_ips").
+	sb := psql.Select("url, slug, ip, counter, created, updated, access_ips, status").
 		From("urls")
 	if longUrl != "" {
 		sb = sb.Where(squirrel.Eq{"url": longUrl})
@@ -34,7 +34,7 @@ func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 	if rows.Next() {
 		var url models.URL
 		var accessIPs []string
-		if err := rows.Scan(&url.Url, &url.Slug, &url.IP, &url.Counter, &url.Created, &url.Updated, pq.Array(&accessIPs)); err != nil {
+		if err := rows.Scan(&url.Url, &url.Slug, &url.IP, &url.Counter, &url.Created, &url.Updated, pq.Array(&accessIPs), &url.Status); err != nil {
 			return nil, err
 		}
 		url.AccessIPs = accessIPs
@@ -45,7 +45,7 @@ func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 
 func GetURLs(db *sqlx.DB) ([]models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Select("url, slug, ip, counter, created, updated, access_ips").
+	sb := psql.Select("url, slug, ip, counter, created, updated, access_ips, status").
 		From("urls").OrderBy("created desc")
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
@@ -63,7 +63,7 @@ func GetURLs(db *sqlx.DB) ([]models.URL, error) {
 	for rows.Next() {
 		var url models.URL
 		var accessIPs []string
-		if err := rows.Scan(&url.Url, &url.Slug, &url.IP, &url.Counter, &url.Created, &url.Updated, pq.Array(accessIPs)); err != nil {
+		if err := rows.Scan(&url.Url, &url.Slug, &url.IP, &url.Counter, &url.Created, &url.Updated, pq.Array(accessIPs), &url.Status); err != nil {
 			return nil, err
 		}
 		url.AccessIPs = accessIPs
