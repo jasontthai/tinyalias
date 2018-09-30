@@ -12,6 +12,7 @@ import (
 	"github.com/google/safebrowsing"
 	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -71,6 +72,13 @@ func RunParseGeoRequestJob(j *que.Job) error {
 }
 
 func RunDetectSpamJob(j *que.Job) error {
+	var request queue.DetectSpamRequest
+	if err := json.Unmarshal(j.Args, &request); err != nil {
+		return errors.Wrap(err, "Unable to unmarshal job arguments into ParseGeoRequest: "+string(j.Args))
+	}
+
+	log.Info("Run spam job on: ", request.URL)
+
 	sb, err := safebrowsing.NewSafeBrowser(safebrowsing.Config{
 		APIKey: os.Getenv("GOOGLE_API_KEY"),
 	})
@@ -80,6 +88,10 @@ func RunDetectSpamJob(j *que.Job) error {
 
 	clauses := make(map[string]interface{})
 	clauses["status"] = "active"
+	if request.URL != "" {
+		clauses["url"] = request.URL
+	}
+
 	urls, err := pg.GetURLs(db, clauses)
 	if err != nil {
 		return err

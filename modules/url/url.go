@@ -76,6 +76,16 @@ func CreateURL(c *gin.Context) {
 		})
 		return
 	}
+
+	// Run spam job on new link
+	_, qc := middleware.GetQue(c)
+	// Dispatch ParseGeoRequestJob
+	if err := queue.DispatchDetectSpamJob(qc, url); err != nil {
+		log.WithFields(log.Fields{
+			"url": url,
+		}).WithError(err).Error("error sending spam detect job")
+	}
+
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
 		"url":   shortened,
 		BaseURL: baseUrl,
@@ -109,7 +119,6 @@ func Get(c *gin.Context) {
 		}
 
 		urlObj.Counter += 1
-		urlObj.AccessIPs = append(urlObj.AccessIPs, c.ClientIP())
 		err = pg.UpdateURL(db, urlObj)
 		if err != nil {
 			c.Error(err)

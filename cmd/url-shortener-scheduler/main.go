@@ -49,7 +49,7 @@ loop:
 			}).Info("Caught shutdown signal")
 			break loop
 		case <-channel:
-			queue.DispatchDetectSpamJob(qc)
+			queue.DispatchDetectSpamJob(qc, "")
 			go func() {
 				time.Sleep(24 * time.Hour) // Run every 24 hours
 				channel <- true

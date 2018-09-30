@@ -18,10 +18,14 @@ type ParseGeoRequest struct {
 	Slug string `json:"slug"`
 }
 
+type DetectSpamRequest struct {
+	URL string `json:"url"`
+}
+
 func DispatchParseGeoRequestJob(qc *que.Client, request ParseGeoRequest) error {
 	enc, err := json.Marshal(request)
 	if err != nil {
-		return errors.Wrap(err, "Marshalling the IndexRequest")
+		return errors.Wrap(err, "Marshalling the ParseGeoRequestJob")
 	}
 
 	j := que.Job{
@@ -32,10 +36,19 @@ func DispatchParseGeoRequestJob(qc *que.Client, request ParseGeoRequest) error {
 	return errors.Wrap(qc.Enqueue(&j), "Enqueueing Job")
 }
 
-func DispatchDetectSpamJob(qc *que.Client) error {
+// DispatchDetectSpamJob dispatches a job to que-go to detect
+// unsafe links. If url is empty, it will scan all urls
+func DispatchDetectSpamJob(qc *que.Client, url string) error {
+
+	request := DetectSpamRequest{url}
+	enc, err := json.Marshal(request)
+	if err != nil {
+		return errors.Wrap(err, "Marshalling the ParseGeoRequestJob")
+	}
+
 	j := que.Job{
 		Type: DetectSpamJob,
-		Args: nil,
+		Args: enc,
 	}
 
 	return errors.Wrap(qc.Enqueue(&j), "Enqueueing Job")
