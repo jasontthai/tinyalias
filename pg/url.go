@@ -57,6 +57,18 @@ func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) 
 		sb = sb.Where(squirrel.Eq{"status": status})
 	}
 
+	if status, ok := clauses["status"].(string); ok {
+		sb = sb.Where(squirrel.Eq{"status": status})
+	}
+
+	if limit, ok := clauses["_limit"].(uint64); ok {
+		sb = sb.Limit(limit)
+	}
+
+	if offset, ok := clauses["_offset"].(uint64); ok {
+		sb = sb.Offset(offset)
+	}
+
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
 		return nil, err

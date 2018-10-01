@@ -81,34 +81,48 @@ func RunDetectSpamJob(j *que.Job) error {
 
 	log.Info("Run spam job on: ", request.URL)
 
-	clauses := make(map[string]interface{})
-	clauses["status"] = "active"
-	if request.URL != "" {
-		clauses["url"] = request.URL
-	}
+	limit := uint64(500)
+	offset := uint64(0)
+	for ; ; offset += limit {
 
-	urls, err := pg.GetURLs(db, clauses)
-	if err != nil {
-		return err
-	}
+		log.WithField("limit", limit).WithField("offset", offset).Info("Getting URLs")
 
-	var urlStr []string
-	for _, url := range urls {
-		urlStr = append(urlStr, url.Url)
-	}
+		clauses := make(map[string]interface{})
+		clauses["status"] = "active"
+		clauses["_limit"] = limit
+		clauses["_offset"] = offset
 
-	threats, err := sb.LookupURLs(urlStr)
-	if err != nil {
-		return err
-	}
+		if request.URL != "" {
+			clauses["url"] = request.URL
+		}
 
-	for i, url := range urls {
-		if len(threats[i]) > 0 {
-			// Detected link as threat - only need to get the first threat type
-			url.Status = threats[i][0].ThreatType.String()
-			err = pg.UpdateURL(db, &url)
-			if err != nil {
-				log.WithError(err).Error("Error updating url")
+		urls, err := pg.GetURLs(db, clauses)
+		if err != nil {
+			return err
+		}
+
+		if len(urls) == 0 {
+			break
+		}
+
+		var urlStr []string
+		for _, url := range urls {
+			urlStr = append(urlStr, url.Url)
+		}
+
+		threats, err := sb.LookupURLs(urlStr)
+		if err != nil {
+			return err
+		}
+
+		for i, url := range urls {
+			if len(threats[i]) > 0 {
+				// Detected link as threat - only need to get the first threat type
+				url.Status = threats[i][0].ThreatType.String()
+				err = pg.UpdateURL(db, &url)
+				if err != nil {
+					log.WithError(err).Error("Error updating url")
+				}
 			}
 		}
 	}
