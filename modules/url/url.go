@@ -65,7 +65,7 @@ func CreateURL(c *gin.Context) {
 	log.WithFields(log.Fields{
 		"url":  url,
 		"slug": slug,
-	}).Debug("Got Post Form")
+	}).Info("Got Post Form")
 
 	shortened, err := createURL(c, url, slug)
 	if err != nil {
