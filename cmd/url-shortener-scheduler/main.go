@@ -27,6 +27,9 @@ func main() {
 	}
 	defer pgxpool.Close()
 
+	log.Info("Scheduler started...")
+	defer log.Info("Scheduler terminated...")
+
 	// Channel for catching shutdown signal
 	//term := make(chan os.Signal, 1)
 	//signal.Notify(term, syscall.SIGINT, syscall.SIGTERM)
