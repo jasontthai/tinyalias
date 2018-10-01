@@ -24,6 +24,7 @@ import (
 var (
 	reader *geoip2.Reader
 	db     *sqlx.DB
+	sb     *safebrowsing.SafeBrowser
 )
 
 func init() {
@@ -72,19 +73,13 @@ func RunParseGeoRequestJob(j *que.Job) error {
 }
 
 func RunDetectSpamJob(j *que.Job) error {
+	var err error
 	var request queue.DetectSpamRequest
-	if err := json.Unmarshal(j.Args, &request); err != nil {
+	if err = json.Unmarshal(j.Args, &request); err != nil {
 		return errors.Wrap(err, "Unable to unmarshal job arguments into ParseGeoRequest: "+string(j.Args))
 	}
 
 	log.Info("Run spam job on: ", request.URL)
-
-	sb, err := safebrowsing.NewSafeBrowser(safebrowsing.Config{
-		APIKey: os.Getenv("GOOGLE_API_KEY"),
-	})
-	if err != nil {
-		return err
-	}
 
 	clauses := make(map[string]interface{})
 	clauses["status"] = "active"
@@ -144,6 +139,14 @@ func main() {
 		log.Fatal("error initializing postgres")
 	}
 	defer db.Close()
+
+	sb, err = safebrowsing.NewSafeBrowser(safebrowsing.Config{
+		APIKey: os.Getenv("GOOGLE_API_KEY"),
+	})
+	if err != nil {
+		log.Fatal("error initializing safe browser client")
+	}
+	defer sb.Close()
 
 	wm := que.WorkMap{
 		queue.ParseGeoRequestJob: RunParseGeoRequestJob,
