@@ -289,6 +289,13 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		c.HTML(http.StatusOK, "privacypolicy.tmpl.html", gin.H{})
 		handled = true
 	}
+
+	if slug == "api" {
+		c.HTML(http.StatusOK, "api.tmpl.html", gin.H{
+			BaseURL: baseUrl,
+		})
+		handled = true
+	}
 	return handled
 }
 
