@@ -85,7 +85,7 @@ func RunDetectSpamJob(j *que.Job) error {
 	offset := uint64(0)
 	for ; ; offset += limit {
 
-		log.WithField("limit", limit).WithField("offset", offset).Info("Getting URLs")
+		log.WithField("limit", limit).WithField("offset", offset).Debug("Getting URLs")
 
 		clauses := make(map[string]interface{})
 		clauses["status"] = "active"
