@@ -39,7 +39,6 @@ func DispatchParseGeoRequestJob(qc *que.Client, request ParseGeoRequest) error {
 // DispatchDetectSpamJob dispatches a job to que-go to detect
 // unsafe links. If url is empty, it will scan all urls
 func DispatchDetectSpamJob(qc *que.Client, url string) error {
-
 	request := DetectSpamRequest{url}
 	enc, err := json.Marshal(request)
 	if err != nil {

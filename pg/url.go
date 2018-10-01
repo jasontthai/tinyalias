@@ -2,6 +2,7 @@ package pg
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -111,6 +112,7 @@ func UpdateURL(db *sqlx.DB, url *models.URL) error {
 	clauses := make(map[string]interface{})
 	clauses["counter"] = url.Counter
 	clauses["status"] = url.Status
+	clauses["updated"] = time.Now()
 	sb := psql.Update("urls").SetMap(clauses).Where(squirrel.Eq{"url": url.Url})
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
