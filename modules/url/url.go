@@ -216,11 +216,6 @@ func createURL(c *gin.Context, url, slug string) (string, error) {
 			url = "https://" + url
 		}
 
-		urlObj, err := pg.GetURL(db, url, "")
-		if err != nil && err != sql.ErrNoRows {
-			return "", err
-		}
-
 		if slug != "" {
 			urlObjBySlug, err := pg.GetURL(db, "", slug)
 			if err != nil && err != sql.ErrNoRows {
@@ -234,18 +229,15 @@ func createURL(c *gin.Context, url, slug string) (string, error) {
 			slug = generateSlug(6)
 		}
 
-		if urlObj == nil {
-			// New URL
-			urlObj = &models.URL{
-				Url:     url,
-				Slug:    slug,
-				Created: time.Now(),
-				IP:      c.ClientIP(),
-			}
-			err = pg.CreateURL(db, urlObj)
-			if err != nil {
-				return "", err
-			}
+		urlObj := &models.URL{
+			Url:     url,
+			Slug:    slug,
+			Created: time.Now(),
+			IP:      c.ClientIP(),
+		}
+		err := pg.CreateURL(db, urlObj)
+		if err != nil {
+			return "", err
 		}
 		shortened = baseUrl + urlObj.Slug
 	}

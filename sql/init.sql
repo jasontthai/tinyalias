@@ -7,8 +7,6 @@ CREATE TABLE IF NOT EXISTS urls (
  );
 
 ALTER TABLE urls
-  ADD CONSTRAINT urls_pk PRIMARY KEY (url);
-ALTER TABLE urls
   ADD CONSTRAINT urls_slug_key UNIQUE (slug);
 
 CREATE INDEX idx_url ON urls USING btree (url);
