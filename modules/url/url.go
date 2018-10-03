@@ -215,17 +215,18 @@ func createURL(c *gin.Context, url, slug string) (string, error) {
 		if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 			url = "https://" + url
 		}
+		if slug == "" {
+			slug = generateSlug(6)
+		}
 
-		if slug != "" {
-			urlObjBySlug, err := pg.GetURL(db, "", slug)
-			if err != nil && err != sql.ErrNoRows {
-				return "", err
+		urlObjBySlug, err := pg.GetURL(db, "", slug)
+		if err != nil && err != sql.ErrNoRows {
+			return "", err
+		}
+		if urlObjBySlug != nil {
+			if urlObjBySlug.Url == url {
+				return baseUrl + urlObjBySlug.Slug, nil
 			}
-			if urlObjBySlug != nil {
-				// slug already exists so we generate new slug
-				slug = slug + "-" + generateSlug(2)
-			}
-		} else {
 			slug = generateSlug(6)
 		}
 
@@ -235,7 +236,7 @@ func createURL(c *gin.Context, url, slug string) (string, error) {
 			Created: time.Now(),
 			IP:      c.ClientIP(),
 		}
-		err := pg.CreateURL(db, urlObj)
+		err = pg.CreateURL(db, urlObj)
 		if err != nil {
 			return "", err
 		}
