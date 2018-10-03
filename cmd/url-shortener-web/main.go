@@ -2,6 +2,8 @@ package main
 
 import (
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
@@ -9,6 +11,9 @@ import (
 	"github.com/newrelic/go-agent"
 	"github.com/newrelic/go-agent/_integrations/nrgin/v1"
 	log "github.com/sirupsen/logrus"
+	"github.com/ulule/limiter"
+	mgin "github.com/ulule/limiter/drivers/middleware/gin"
+	"github.com/ulule/limiter/drivers/store/memory"
 	"github.com/zirius/url-shortener/middleware"
 	"github.com/zirius/url-shortener/modules/queue"
 	"github.com/zirius/url-shortener/modules/url"
@@ -37,11 +42,25 @@ func main() {
 		log.Fatal("error initializing new relic")
 	}
 
+	// Que-Go
 	pgxpool, qc, err := queue.Setup(database)
 	if err != nil {
 		log.Fatal("error initializing que-go")
 	}
 	defer pgxpool.Close()
+
+	// Rate Limiter
+	rate := limiter.Rate{
+		Period: time.Second,
+		Limit: func() int64 {
+			rate, err := strconv.Atoi(os.Getenv("RATE_LIMIT"))
+			if err != nil {
+				return 100
+			}
+			return int64(rate)
+		}(),
+	}
+	store := memory.NewStore()
 
 	router := gin.New()
 	router.Use(gin.Logger())
@@ -52,6 +71,8 @@ func main() {
 	router.Use(middleware.GeoIP())
 	router.Use(middleware.Que(pgxpool, qc))
 	router.Use(nrgin.Middleware(app))
+	router.Use(mgin.NewMiddleware(limiter.New(store, rate)))
+	router.ForwardedByClientIP = true
 
 	router.GET("", url.GetHomePage)
 	router.POST("", url.CreateURL)

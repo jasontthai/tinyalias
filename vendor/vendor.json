@@ -269,6 +269,30 @@
 			"revisionTime": "2018-08-31T06:23:57Z"
 		},
 		{
+			"checksumSHA1": "eXCCQO9Bca81GCoesGI4ft/Ei8o=",
+			"path": "github.com/ulule/limiter",
+			"revision": "1f43cf9e49e56c9b502d08637597c2cc60aeeec5",
+			"revisionTime": "2018-09-10T08:32:27Z"
+		},
+		{
+			"checksumSHA1": "9SGq41ZjE9nTdOQdG+iQrSD1Ie4=",
+			"path": "github.com/ulule/limiter/drivers/middleware/gin",
+			"revision": "1f43cf9e49e56c9b502d08637597c2cc60aeeec5",
+			"revisionTime": "2018-09-10T08:32:27Z"
+		},
+		{
+			"checksumSHA1": "7syqsHkDxXhjLoR00T0yNzOEE+Q=",
+			"path": "github.com/ulule/limiter/drivers/store/common",
+			"revision": "1f43cf9e49e56c9b502d08637597c2cc60aeeec5",
+			"revisionTime": "2018-09-10T08:32:27Z"
+		},
+		{
+			"checksumSHA1": "4Zs9IDhHW4QTMc0Fu/XlPeVjFa8=",
+			"path": "github.com/ulule/limiter/drivers/store/memory",
+			"revision": "1f43cf9e49e56c9b502d08637597c2cc60aeeec5",
+			"revisionTime": "2018-09-10T08:32:27Z"
+		},
+		{
 			"checksumSHA1": "BGm8lKZmvJbf/YOJLeL1rw2WVjA=",
 			"path": "golang.org/x/crypto/ssh/terminal",
 			"revision": "0e37d006457bf46f9e6692014ba72ef82c33022c",
