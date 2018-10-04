@@ -215,22 +215,19 @@ func createURL(c *gin.Context, url, slug string) (string, error) {
 		if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 			url = "https://" + url
 		}
+		urlObj, err := pg.GetURL(db, url, slug)
+		if err != nil && err != sql.ErrNoRows {
+			return "", err
+		}
+		if urlObj != nil {
+			return baseUrl + urlObj.Slug, nil
+		}
+
 		if slug == "" {
 			slug = generateSlug(6)
 		}
 
-		urlObjBySlug, err := pg.GetURL(db, "", slug)
-		if err != nil && err != sql.ErrNoRows {
-			return "", err
-		}
-		if urlObjBySlug != nil {
-			if urlObjBySlug.Url == url {
-				return baseUrl + urlObjBySlug.Slug, nil
-			}
-			slug = generateSlug(6)
-		}
-
-		urlObj := &models.URL{
+		urlObj = &models.URL{
 			Url:     url,
 			Slug:    slug,
 			Created: time.Now(),
