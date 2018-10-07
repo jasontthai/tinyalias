@@ -113,7 +113,7 @@ func UpdateURL(db *sqlx.DB, url *models.URL) error {
 	clauses["counter"] = url.Counter
 	clauses["status"] = url.Status
 	clauses["updated"] = time.Now()
-	sb := psql.Update("urls").SetMap(clauses).Where(squirrel.Eq{"url": url.Url})
+	sb := psql.Update("urls").SetMap(clauses).Where(squirrel.Eq{"slug": url.Slug})
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
 		return err
