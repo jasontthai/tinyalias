@@ -16,7 +16,7 @@ ALTER TABLE urls
   ADD COLUMN counter INT DEFAULT 0 NOT NULL;
 
 ALTER TABLE urls
-  ADD COLUMN password text;
+  ADD COLUMN password text DEFAULT '';
 
 ALTER TABLE urls
   ADD COLUMN expired timestamp without time zone;
