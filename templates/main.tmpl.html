@@ -26,7 +26,6 @@
             </div>
         </nav>
 
-
         <div class="my-5 col-md-12">
         </div>
 
@@ -41,13 +40,53 @@
                         <button type="submit" class="btn btn-primary">Shorten</button>
                     </div>
                 </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon3">{{ .baseUrl }}</span>
+                <div id="accordion">
+                    <div id="collapseAlias" class="collapse show" aria-labelledby="headingOne">
+                        <h5>Set Alias</h5>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon3">{{ .baseUrl }}</span>
+                            </div>
+                            <input type="text" class="form-control" name="SLUG" aria-describedby="basic-addon3" placeholder="Alias (optional)">
+                        </div>
                     </div>
-                    <input type="text" class="form-control" name="SLUG" aria-describedby="basic-addon3" placeholder="Alias (optional)">
+                    <div id="collapsePassword" class="collapse" aria-labelledby="headingOne">
+                        <h5>Set Password</h5>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon3">Password</span>
+                            </div>
+                            <input type="password" class="form-control" name="PASSWORD" aria-describedby="basic-addon3" placeholder="Alias (optional)">
+                        </div>
+                    </div>
+                    <div id="collapseExpiration" class="collapse" aria-labelledby="headingOne">
+                        <h5>Set Expiration</h5>
+                        <div class="input-group mb-3 date" id="datetimepicker1" data-target-input="nearest">
+                            <div class="input-group-prepend" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                            <input type="text" id="expiration-id" class="form-control datetimepicker-input" name="EXPIRATION" data-toggle="datetimepicker" data-target="#datetimepicker1"/>
+                        </div>
+                    </div>
+                    <div class="card-header bg-light mb-3" id="headingOne">
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <span class="input-group-text">Options</span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-toggle="collapse" data-target="#collapseAlias">Set Alias</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link"  href="#" data-toggle="collapse" data-target="#collapsePassword">Set Password</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-toggle="collapse" data-target="#collapseExpiration">Set Expiration</a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </form>
+
             {{ if .url  }}
                 <h1 style="word-wrap: break-word"> <a style="color:white" id="url-id" href="#" data-clipboard-text={{.url}}>{{.url}}</a> <span id="copied"></span></h1>
             {{ end }}
@@ -75,7 +114,9 @@
                 console.log(e);
             });
         }
-
+        $(function() {
+            $('#datetimepicker1').datetimepicker()
+        });
     </script>
 	</body>
     {{template "footer.tmpl.html" . }}

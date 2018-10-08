@@ -11,6 +11,7 @@ import (
 const (
 	ParseGeoRequestJob = "ParseGeoRequestJob"
 	DetectSpamJob      = "DetectSpamJob"
+	ExpirationJob      = "ExpirationJob"
 )
 
 type ParseGeoRequest struct {
@@ -50,6 +51,14 @@ func DispatchDetectSpamJob(qc *que.Client, url string) error {
 		Args: enc,
 	}
 
+	return errors.Wrap(qc.Enqueue(&j), "Enqueueing Job")
+}
+
+func DispatchExpirationJob(qc *que.Client) error {
+	j := que.Job{
+		Type: ExpirationJob,
+		Args: nil,
+	}
 	return errors.Wrap(qc.Enqueue(&j), "Enqueueing Job")
 }
 

@@ -15,6 +15,12 @@ CREATE INDEX idx_slug ON urls USING btree (slug);
 ALTER TABLE urls
   ADD COLUMN counter INT DEFAULT 0 NOT NULL;
 
+ALTER TABLE urls
+  ADD COLUMN password text;
+
+ALTER TABLE urls
+  ADD COLUMN expired timestamp without time zone;
+
 CREATE INDEX idx_counter ON urls USING btree (counter);
 
 ALTER TABLE urls

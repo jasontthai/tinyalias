@@ -20,6 +20,12 @@
 			"revisionTime": "2018-02-08T22:57:42Z"
 		},
 		{
+			"checksumSHA1": "CSPbwbyzqA6sfORicn4HFtIhF/c=",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "d8f796af33cc11cb798c1aaeb27a4ebc5099927d",
+			"revisionTime": "2018-08-30T19:11:22Z"
+		},
+		{
 			"checksumSHA1": "QeKwBtN2df+j+4stw3bQJ6yO4EY=",
 			"path": "github.com/gin-contrib/sse",
 			"revision": "22d885f9ecc78bf4ee5d72b937e4bbcdc58e8cae",
@@ -257,10 +263,22 @@
 			"revisionTime": "2018-09-11T06:21:13Z"
 		},
 		{
+			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
+			"path": "github.com/pmezard/go-difflib/difflib",
+			"revision": "792786c7400a136282c1664665ae0a8db921c6c2",
+			"revisionTime": "2016-01-10T10:55:54Z"
+		},
+		{
 			"checksumSHA1": "mVse81rphxcTRDHBRG1fZnfwJ8w=",
 			"path": "github.com/sirupsen/logrus",
 			"revision": "f3df9aeffda7c12bd9f5a03f9251d75d35993165",
 			"revisionTime": "2018-09-08T09:18:16Z"
+		},
+		{
+			"checksumSHA1": "yEqObY2i8tbWEB4e/oVJDURhMf4=",
+			"path": "github.com/stretchr/testify/assert",
+			"revision": "2db35c88b92a1631e987089b5485a95e68bc5d3a",
+			"revisionTime": "2018-10-02T11:39:27Z"
 		},
 		{
 			"checksumSHA1": "r5mYMnU412QZoiUqOxq/mJLYc4M=",
@@ -291,6 +309,18 @@
 			"path": "github.com/ulule/limiter/drivers/store/memory",
 			"revision": "1f43cf9e49e56c9b502d08637597c2cc60aeeec5",
 			"revisionTime": "2018-09-10T08:32:27Z"
+		},
+		{
+			"checksumSHA1": "oCH3J96RWvO8W4xjix47PModpio=",
+			"path": "golang.org/x/crypto/bcrypt",
+			"revision": "e3636079e1a4c1f337f212cc5cd2aca108f6c900",
+			"revisionTime": "2018-09-26T22:24:25Z"
+		},
+		{
+			"checksumSHA1": "oVPHWesOmZ02vLq2fglGvf+AMgk=",
+			"path": "golang.org/x/crypto/blowfish",
+			"revision": "e3636079e1a4c1f337f212cc5cd2aca108f6c900",
+			"revisionTime": "2018-09-26T22:24:25Z"
 		},
 		{
 			"checksumSHA1": "BGm8lKZmvJbf/YOJLeL1rw2WVjA=",

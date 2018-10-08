@@ -11,7 +11,7 @@ import (
 
 func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Select("url, slug, ip, counter, created, updated, status").
+	sb := psql.Select("url, slug, ip, counter, created, updated, status, password, expired").
 		From("urls")
 	if longUrl != "" {
 		sb = sb.Where(squirrel.Eq{"url": longUrl})
@@ -33,7 +33,7 @@ func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 
 	if rows.Next() {
 		var url models.URL
-		if err := rows.Scan(&url.Url, &url.Slug, &url.IP, &url.Counter, &url.Created, &url.Updated, &url.Status); err != nil {
+		if err := rows.StructScan(&url); err != nil {
 			return nil, err
 		}
 		return &url, nil
@@ -43,7 +43,7 @@ func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 
 func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Select("url, slug, ip, counter, created, updated, status").
+	sb := psql.Select("url, slug, ip, counter, created, updated, status, password, expired").
 		From("urls").OrderBy("created desc")
 
 	if slug, ok := clauses["slug"].(string); ok {
@@ -85,7 +85,7 @@ func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) 
 
 	for rows.Next() {
 		var url models.URL
-		if err := rows.Scan(&url.Url, &url.Slug, &url.IP, &url.Counter, &url.Created, &url.Updated, &url.Status); err != nil {
+		if err := rows.StructScan(&url); err != nil {
 			return nil, err
 		}
 		urls = append(urls, url)
@@ -95,7 +95,7 @@ func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) 
 
 func CreateURL(db *sqlx.DB, url *models.URL) error {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Insert("urls").Columns("url, slug, ip, counter, created, updated").Values(url.Url, url.Slug, url.IP, url.Counter, url.Created, url.Updated)
+	sb := psql.Insert("urls").Columns("url, slug, ip, counter, created, updated, password, expired").Values(url.Url, url.Slug, url.IP, url.Counter, url.Created, url.Updated, url.Password, url.Expired)
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
 		return err

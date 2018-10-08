@@ -130,6 +130,12 @@ func RunDetectSpamJob(j *que.Job) error {
 	return nil
 }
 
+func RunExpirationJob(j *que.Job) error {
+	log.Info("Running Expiration Job")
+	_, err := db.Exec("UPDATE urls SET status = 'expired' WHERE expired IS NOT NULL AND expired < NOW()")
+	return err
+}
+
 func main() {
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
@@ -165,6 +171,7 @@ func main() {
 	wm := que.WorkMap{
 		queue.ParseGeoRequestJob: RunParseGeoRequestJob,
 		queue.DetectSpamJob:      RunDetectSpamJob,
+		queue.ExpirationJob:      RunExpirationJob,
 	}
 
 	// 1 worker go routine

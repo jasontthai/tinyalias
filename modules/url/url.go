@@ -7,10 +7,12 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
 	"github.com/zirius/url-shortener/middleware"
 	"github.com/zirius/url-shortener/models"
@@ -31,6 +33,7 @@ func init() {
 const (
 	base          = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
 	NotFoundQuery = "not-found"
+	ExpiredQuery  = "expired"
 	ThreatQuery   = "threat"
 	SlugQuery     = "slug"
 	BaseURL       = "baseUrl"
@@ -53,6 +56,11 @@ func GetHomePage(c *gin.Context) {
 		error = fmt.Sprintf("The link is detected as unsafe. Reason: %s", threatQuery)
 	}
 
+	expiredQuery := c.Query(ExpiredQuery)
+	if expiredQuery != "" {
+		error = "The link you entered has expired. Fancy creating one?"
+	}
+
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
 		BaseURL: baseUrl,
 		"error": error,
@@ -62,12 +70,25 @@ func GetHomePage(c *gin.Context) {
 func CreateURL(c *gin.Context) {
 	url := c.PostForm("URL")
 	slug := c.PostForm("SLUG")
-	log.WithFields(log.Fields{
-		"url":  url,
-		"slug": slug,
-	}).Info("Got Post Form")
+	expiration := c.PostForm("EXPIRATION")
+	password := c.PostForm("PASSWORD")
 
-	shortened, err := createURL(c, url, slug)
+	var expirationTime time.Time
+	var err error
+	if expiration != "" {
+		// 10/31/2018 1:57 PM
+		expirationTime, err = time.Parse("01/02/2006 3:04 PM", expiration)
+		if err != nil {
+			c.Error(err)
+			c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
+				"error": "Oops. Something went wrong. Please try again.",
+				BaseURL: baseUrl,
+			})
+			return
+		}
+	}
+
+	shortened, err := createURL(c, url, slug, password, expirationTime)
 	if err != nil {
 		c.Error(err)
 		c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
@@ -75,15 +96,6 @@ func CreateURL(c *gin.Context) {
 			BaseURL: baseUrl,
 		})
 		return
-	}
-
-	// Run spam job on new link
-	_, qc := middleware.GetQue(c)
-	// Dispatch ParseGeoRequestJob
-	if err := queue.DispatchDetectSpamJob(qc, url); err != nil {
-		log.WithFields(log.Fields{
-			"url": url,
-		}).WithError(err).Error("error sending spam detect job")
 	}
 
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
@@ -111,11 +123,33 @@ func Get(c *gin.Context) {
 	}
 
 	if urlObj != nil {
+		if urlObj.Status == "expired" || (urlObj.Expired.Valid && urlObj.Expired.Time.Before(time.Now().UTC())) {
+			c.Redirect(http.StatusFound, fmt.Sprintf("?%v=%v", ExpiredQuery, slug))
+			return
+		}
 
 		// return spammed
 		if urlObj.Status != "active" {
 			c.Redirect(http.StatusFound, fmt.Sprintf("?%v=%v&%v=%v", ThreatQuery, urlObj.Status, SlugQuery, slug))
 			return
+		}
+
+		if urlObj.Password != "" {
+			if c.Query("password") != "" {
+				err = models.VerifyPassword(urlObj.Password, c.Query("password"))
+				if err != nil {
+					c.HTML(http.StatusOK, "password.tmpl.html", gin.H{
+						"baseUrl": baseUrl,
+						"error":   "Wrong Password. Try Again.",
+					})
+					return
+				}
+			} else {
+				c.HTML(http.StatusOK, "password.tmpl.html", gin.H{
+					"baseUrl": baseUrl,
+				})
+				return
+			}
 		}
 
 		urlObj.Counter += 1
@@ -146,12 +180,24 @@ func Get(c *gin.Context) {
 func APICreateURL(c *gin.Context) {
 	url := c.Query("url")
 	slug := c.Query("alias")
-	log.WithFields(log.Fields{
-		"url":  url,
-		"slug": slug,
-	}).Info("Got Queries")
+	password := c.Query("password")
+	expired := c.Query("expiration")
 
-	shortened, err := createURL(c, url, slug)
+	var expiration time.Time
+	if expired != "" {
+		i, err := strconv.ParseInt(expired, 10, 64)
+		if err != nil {
+			c.Error(err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"error":   "Failed to parse expiration. Expiration must be unix timestamp",
+			})
+			return
+		}
+		expiration = time.Unix(i, 0)
+	}
+
+	shortened, err := createURL(c, url, slug, password, expiration)
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -159,15 +205,6 @@ func APICreateURL(c *gin.Context) {
 			"error":   err.Error(),
 		})
 		return
-	}
-
-	// Run spam job on new link
-	_, qc := middleware.GetQue(c)
-	// Dispatch ParseGeoRequestJob
-	if err := queue.DispatchDetectSpamJob(qc, url); err != nil {
-		log.WithFields(log.Fields{
-			"url": url,
-		}).WithError(err).Error("error sending spam detect job")
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -205,40 +242,63 @@ func APIGetURL(c *gin.Context) {
 	})
 }
 
-func createURL(c *gin.Context, url, slug string) (string, error) {
+func createURL(c *gin.Context, url, slug, password string, expiration time.Time) (string, error) {
 	db := middleware.GetDB(c)
+	_, qc := middleware.GetQue(c)
 
 	var shortened string
-	if url != "" {
-		// URL sanitization
-		url = strings.TrimSpace(url)
-		if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-			url = "https://" + url
-		}
-		urlObj, err := pg.GetURL(db, url, slug)
-		if err != nil && err != sql.ErrNoRows {
-			return "", err
-		}
-		if urlObj != nil {
-			return baseUrl + urlObj.Slug, nil
-		}
+	if url == "" {
+		return shortened, nil
+	}
 
-		if slug == "" {
-			slug = generateSlug(6)
-		}
+	// URL sanitization
+	url = strings.TrimSpace(url)
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		url = "https://" + url
+	}
+	urlObj, err := pg.GetURL(db, url, slug)
+	if err != nil && err != sql.ErrNoRows {
+		return "", err
+	}
+	if urlObj != nil {
+		return baseUrl + urlObj.Slug, nil
+	}
 
-		urlObj = &models.URL{
-			Url:     url,
-			Slug:    slug,
-			Created: time.Now(),
-			IP:      c.ClientIP(),
-		}
-		err = pg.CreateURL(db, urlObj)
+	if slug == "" {
+		slug = generateSlug(6)
+	}
+
+	urlObj = &models.URL{
+		Url:     url,
+		Slug:    slug,
+		Created: time.Now(),
+		IP:      c.ClientIP(),
+	}
+
+	if password != "" {
+		urlObj.Password, err = models.TransformPassword(password)
 		if err != nil {
 			return "", err
 		}
-		shortened = baseUrl + urlObj.Slug
 	}
+	if !expiration.Equal(time.Time{}) {
+		urlObj.Expired = null.TimeFrom(expiration)
+	}
+
+	// Run spam job on new link
+	err = pg.CreateURL(db, urlObj)
+	if err != nil {
+		return "", err
+	}
+	shortened = baseUrl + urlObj.Slug
+
+	// Dispatch ParseGeoRequestJob
+	if err := queue.DispatchDetectSpamJob(qc, url); err != nil {
+		log.WithFields(log.Fields{
+			"url": url,
+		}).WithError(err).Error("error sending spam detect job")
+	}
+
 	log.WithFields(log.Fields{
 		"short":    shortened,
 		"original": url,
