@@ -31,6 +31,9 @@ jobs:
 
     steps:
       - checkout
+      - add_ssh_key:
+          fingerprints:
+            - "ce:3c:d7:de:97:ee:a9:db:9d:7d:41:48:4f:37:a7:59"
       - run: ssh-keyscan -H 138.68.50.109 >> ~/.ssh/known_hosts
       - run: git remote add dokku dokku@138.68.50.109:tinyalias
       - run: git push dokku $CIRCLE_BRANCH
