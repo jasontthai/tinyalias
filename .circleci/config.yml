@@ -33,7 +33,7 @@ jobs:
       - checkout
       - run: ssh-keyscan -H 138.68.50.109 >> ~/.ssh/known_hosts
       - run: git remote add dokku dokku@138.68.50.109:tinyalias
-      - run: git push dokku "$BRANCH"
+      - run: git push dokku $CIRCLE_BRANCH
 
 workflows:
   version: 2
