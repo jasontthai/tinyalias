@@ -34,7 +34,7 @@
                 <div class="col align-self-center">
                     <h2>TinyAlias Create Link API</h2>
                     <pre><code class="language-json text-white">
-GET https://api.tinyalias.com/create?url={URL}&alias={ALIAS}
+GET https://api.tinyalias.com/create?url={URL}&alias={ALIAS}&password={PASSWORD}&expiration={EXPIRATION}
             </code></pre>
                     <h2>Example</h2>
                     <pre><code class="language-json text-white">
@@ -57,12 +57,12 @@ Response:
 }
             </code></pre>
                     <pre><code class="language-json text-white">
-GET https://api.tinyalias.com/create?url=api.tinyalias.com&amp;alias=api&expiration=1539096986
+GET https://api.tinyalias.com/create?url=api.tinyalias.com&amp;alias=tinyapi&expiration=1539096986
 Response:
 {
     "expiration": 1539096986,
     "original": "api.tinyalias.com",
-    "short": "https://tinyalias.com/api",
+    "short": "https://tinyalias.com/tinyapi",
     "success": true
 }
             </code></pre>
