@@ -24,3 +24,10 @@ jobs:
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
       - run: go test -v ./...
+
+  deployment:
+    production:
+      branch: master
+      commands:
+      - git remote add dokku dokku@exp.jasonthai.com:tinyalias
+      - git push dokku master
