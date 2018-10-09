@@ -29,5 +29,5 @@ jobs:
     production:
       branch: master
       steps:
-      - git remote add dokku dokku@exp.jasonthai.com:tinyalias
-      - git push dokku master
+      - run: git remote add dokku dokku@exp.jasonthai.com:tinyalias
+      - run: git push dokku master
