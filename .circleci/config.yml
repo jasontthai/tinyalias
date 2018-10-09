@@ -26,6 +26,10 @@ jobs:
       - run: go test -v ./...
 
   deploy:
+    docker:
+    # specify the version
+    - image: circleci/golang:1.10.4
+      
     steps:
       - checkout
       - run: git remote add dokku dokku@exp.jasonthai.com:tinyalias
