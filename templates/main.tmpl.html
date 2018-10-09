@@ -50,22 +50,24 @@
                             <input type="text" class="form-control" name="SLUG" aria-describedby="basic-addon3" placeholder="Alias (optional)">
                         </div>
                     </div>
-                    <div id="collapsePassword" class="collapse" aria-labelledby="headingOne">
-                        <h5>Set Password</h5>
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon3">Password</span>
+                    <div id="collapseOptions" class="row collapse" aria-labelledby="headingOne">
+                        <div class="col">
+                            <h5>Set Password</h5>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon3"><i class="fa fa-key"></i></span>
+                                </div>
+                                <input type="password" class="form-control" name="PASSWORD" aria-describedby="basic-addon3" placeholder="Password (optional)">
                             </div>
-                            <input type="password" class="form-control" name="PASSWORD" aria-describedby="basic-addon3" placeholder="Password (optional)">
                         </div>
-                    </div>
-                    <div id="collapseExpiration" class="collapse" aria-labelledby="headingOne">
-                        <h5>Set Expiration</h5>
-                        <div class="input-group mb-3 date" id="datetimepicker1" data-target-input="nearest">
-                            <div class="input-group-prepend" data-target="#datetimepicker1" data-toggle="datetimepicker">
-                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        <div class="col">
+                            <h5>Set Expiration</h5>
+                            <div class="input-group mb-3 date" id="datetimepicker1" data-target-input="nearest">
+                                <div class="input-group-prepend" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                                <input type="text" id="expiration-id" class="form-control datetimepicker-input" name="EXPIRATION" data-toggle="datetimepicker" data-target="#datetimepicker1"/>
                             </div>
-                            <input type="text" id="expiration-id" class="form-control datetimepicker-input" name="EXPIRATION" data-toggle="datetimepicker" data-target="#datetimepicker1"/>
                         </div>
                     </div>
                     <div class="card-header bg-light mb-3" id="headingOne">
@@ -74,13 +76,7 @@
                                 <span class="input-group-text">Options</span>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#" data-toggle="collapse" data-target="#collapseAlias">Set Alias</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link"  href="#" data-toggle="collapse" data-target="#collapsePassword">Set Password</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#" data-toggle="collapse" data-target="#collapseExpiration">Set Expiration</a>
+                                <a class="nav-link"  href="#" data-toggle="collapse" data-target="#collapseOptions">Other Options</a>
                             </li>
                         </ul>
                     </div>
