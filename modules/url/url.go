@@ -31,13 +31,22 @@ func init() {
 }
 
 const (
-	base          = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
+	base          = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
 	NotFoundQuery = "not-found"
 	ExpiredQuery  = "expired"
 	ThreatQuery   = "threat"
 	SlugQuery     = "slug"
 	BaseURL       = "baseUrl"
 )
+
+type APIResponse struct {
+	Success    bool   `json:"success"`
+	Error      string `json:"error,omitempty"`
+	Short      string `json:"short"`
+	Original   string `json:"original"`
+	Password   string `json:"password,omitempty"`
+	Expiration int64  `json:"expiration,omitempty"`
+}
 
 func GetHomePage(c *gin.Context) {
 	if strings.Contains(c.Request.Host, "api") {
@@ -207,11 +216,18 @@ func APICreateURL(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success":  true,
-		"short":    shortened,
-		"original": url,
-	})
+	res := APIResponse{
+		Success:  true,
+		Password: password,
+		Short:    shortened,
+		Original: url,
+	}
+	if !expiration.Equal(time.Time{}) {
+		res.Expiration = expiration.Unix()
+	}
+
+	c.JSON(http.StatusOK, res)
+	return
 }
 
 func APIGetURL(c *gin.Context) {
