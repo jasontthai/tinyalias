@@ -31,6 +31,9 @@ jobs:
 
     steps:
       - checkout
+      - add_ssh_keys:
+          fingerprints:
+          - "41:f3:b6:80:33:c5:f9:1a:d2:f3:0d:da:09:62:af:cc"
       - run: git remote add dokku dokku@138.68.50.109:tinyalias
       - run: git push dokku master
 
