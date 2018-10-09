@@ -28,6 +28,6 @@ jobs:
   deployment:
     production:
       branch: master
-      commands:
+      steps:
       - git remote add dokku dokku@exp.jasonthai.com:tinyalias
       - git push dokku master
