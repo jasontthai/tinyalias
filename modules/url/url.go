@@ -123,7 +123,7 @@ func Get(c *gin.Context) {
 	}
 
 	if urlObj != nil {
-		if urlObj.Status == "expired" || (urlObj.Expired.Valid && urlObj.Expired.Time.Before(time.Now().UTC())) {
+		if urlObj.Status == "expired" || (urlObj.Expired.Valid && urlObj.Expired.Time.Before(time.Now())) {
 			c.Redirect(http.StatusFound, fmt.Sprintf("?%v=%v", ExpiredQuery, slug))
 			return
 		}
