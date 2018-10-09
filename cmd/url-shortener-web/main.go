@@ -36,12 +36,6 @@ func main() {
 		log.Fatal("$DATABASE_URL must be set")
 	}
 
-	config := newrelic.NewConfig(os.Getenv("APP_NAME"), os.Getenv("NEW_RELIC_LICENSE_KEY"))
-	app, err := newrelic.NewApplication(config)
-	if err != nil {
-		log.Fatal("error initializing new relic")
-	}
-
 	// Que-Go
 	pgxpool, qc, err := queue.Setup(database)
 	if err != nil {
@@ -70,9 +64,17 @@ func main() {
 	router.Use(middleware.Database(database))
 	router.Use(middleware.GeoIP())
 	router.Use(middleware.Que(pgxpool, qc))
-	router.Use(nrgin.Middleware(app))
 	router.Use(mgin.NewMiddleware(limiter.New(store, rate)))
 	router.ForwardedByClientIP = true
+
+	if os.Getenv("NEW_RELIC_LICENSE_KEY") != "" {
+		config := newrelic.NewConfig(os.Getenv("APP_NAME"), os.Getenv("NEW_RELIC_LICENSE_KEY"))
+		app, err := newrelic.NewApplication(config)
+		if err != nil {
+			log.Fatal("error initializing new relic")
+		}
+		router.Use(nrgin.Middleware(app))
+	}
 
 	router.GET("", url.GetHomePage)
 	router.POST("", url.CreateURL)
