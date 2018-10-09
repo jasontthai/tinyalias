@@ -26,8 +26,9 @@ jobs:
       - run: go test -v ./...
 
   deploy:
-    machine:
-      enabled: true
+    docker:
+    # specify the version
+    - image: circleci/golang:1.10.4
 
     steps:
       - checkout
