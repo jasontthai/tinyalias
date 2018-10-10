@@ -16,6 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/zirius/url-shortener/middleware"
 	"github.com/zirius/url-shortener/models"
+	"github.com/zirius/url-shortener/modules/newsapi"
 	"github.com/zirius/url-shortener/modules/queue"
 	"github.com/zirius/url-shortener/pg"
 )
@@ -369,6 +370,22 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		c.HTML(http.StatusOK, "api.tmpl.html", gin.H{
 			BaseURL: baseUrl,
 		})
+		handled = true
+	}
+
+	if slug == "experiments" {
+		client := newsapi.NewClient(os.Getenv("NEWS_API_KEY"))
+		articles, err := client.GetTopHeadlines()
+		if err != nil {
+			c.Error(err)
+			c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
+				"error": err.Error(),
+			})
+		} else {
+			c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
+				"articles": articles,
+			})
+		}
 		handled = true
 	}
 	return handled
