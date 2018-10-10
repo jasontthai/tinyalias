@@ -390,7 +390,7 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = true
 	}
 
-	if slug == "experiments" {
+	if slug == "news" {
 		client := newsapi.NewClient(os.Getenv("NEWS_API_KEY"))
 		articles, err := client.GetTopHeadlines()
 		if err != nil {
