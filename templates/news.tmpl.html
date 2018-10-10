@@ -3,7 +3,7 @@
 {{template "header.tmpl.html" . }}
 <body class="jumbotron bg-dark">
 
-<nav class="navbar navbar-expand-sm navbar-dark">
+<nav class="navbar navbar-expand-sm navbar-dark mb-5">
     <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
         <a class="navbar-brand mb-0 h1" href="/">TinyAlias</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -15,32 +15,36 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
                 </li>
-                <li class="nav-item active">
+                <li class="nav-item">
                     <a class="nav-link" href="#">Analytics</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/api">API</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/experiments">Experiments</a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="my-5 col-md-12">
-</div>
-
 <div class="container">
 {{ if .articles }}
     {{/*<ul class="list-group">*/}}
     {{ range .articles }}
         {{/*<li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center">*/}}
-            <div class="card text-dark">
-                <h5 class="card-header">{{ .Title }}</h5>
+        <form method="GET">
+            <div class="card text-dark my-3">
+                <h5 class="card-header"><a href="{{ .URL }}">{{ .Title }}</a></h5>
+                <input type="hidden" name="url" id="url" value="{{ .URL }}">
                 <div class="card-body">
-                   <p class="card-text">{{ .Content }}</p>
-                    {{/*<a href="#" class="btn btn-primary">Go somewhere</a>*/}}
+                    <p class="card-text">Description: {{ .Description }}</p>
+                    <p class="card-text">Content: {{ .Content }}</p>
+                    <button onclick=getLink() class="btn btn-primary">Get Short Link</button>
                 </div>
             </div>
+        </form>
         {{/*</li>*/}}
     {{ end }}
     {{/*</ul>*/}}
@@ -55,6 +59,17 @@
 {{ end }}
     <span><a style="color: #e9831a" href="/">Create Another Link Here</a></span>
 </div>
+<script>
+    function getLink() {
+        $.ajax({
+            url: "http://localhost:5000/create?url=" + $("input#url"),
+            dataType: "json",
+            success: function(data) {
+                console.log(data)
+            }
+        })
+    }
+</script>
 </body>
 {{template "footer.tmpl.html" . }}
 </html>
