@@ -81,7 +81,7 @@
             </form>
 
             {{ if .url  }}
-                <h1 style="word-wrap: break-word"> <a style="color:white" id="url-id" href="#" data-clipboard-text={{.url}}>{{.url}}</a> <span id="copied"></span></h1>
+                <h1 style="word-wrap: break-word"> <a id="url-id" href="#" data-clipboard-text={{.url}}>{{.url}}</a> <span id="copied"><i class="fa fa-arrow-left"></i> click to copy </span></h1>
             {{ end }}
             {{ if .error }}
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
