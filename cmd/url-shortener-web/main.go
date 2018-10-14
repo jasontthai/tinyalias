@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
 	_ "github.com/lib/pq"
@@ -76,6 +78,7 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           10 * time.Minute,
 	}))
+	router.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	if os.Getenv("NEW_RELIC_LICENSE_KEY") != "" {
 		config := newrelic.NewConfig(os.Getenv("APP_NAME"), os.Getenv("NEW_RELIC_LICENSE_KEY"))
