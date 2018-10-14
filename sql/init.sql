@@ -21,6 +21,9 @@ ALTER TABLE urls
 ALTER TABLE urls
   ADD COLUMN expired timestamp without time zone;
 
+ALTER TABLE urls
+  ADD COLUMN mindful boolean NOT NULL default false;
+
 CREATE INDEX idx_counter ON urls USING btree (counter);
 
 ALTER TABLE urls

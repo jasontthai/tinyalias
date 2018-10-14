@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+{{template "header.tmpl.html" . }}
+<body class="jumbotron bg-dark">
+
+<nav class="navbar navbar-expand-sm navbar-dark mb-5">
+    <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
+        <a class="navbar-brand mb-0 h1" href="/">TinyAlias</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Analytics</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/api">API</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <h4 id="mindful"></h4>
+    <h5>Or you can go to your link here <a href="{{ .url }}">{{ .url }}</a></h5>
+</div>
+
+{{template "quotes.tmpl.html" . }}
+</body>
+<script>
+    var seconds_left = 10;
+    document.getElementById("mindful").innerHTML = "This is a mindful link. Take a moment to breathe and be here and now. You will be directed in " + seconds_left + " seconds";
+    $(document).ready(function () {
+        setInterval(function () {
+            document.getElementById("mindful").innerHTML = "This is a mindful link. Take a moment to breathe and be here and now. You will be directed in " + --seconds_left +" seconds";
+        },1000);
+        window.setTimeout(function () {
+            location.href = {{ .url }};
+        }, seconds_left * 1000);
+    });
+</script>
+{{template "footer.tmpl.html" . }}
+</html>

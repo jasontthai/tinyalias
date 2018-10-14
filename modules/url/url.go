@@ -81,6 +81,7 @@ func CreateURL(c *gin.Context) {
 	slug := c.PostForm("SLUG")
 	expiration := c.PostForm("EXPIRATION")
 	password := c.PostForm("PASSWORD")
+	mindful := c.PostForm("MINDFUL")
 
 	var expirationTime time.Time
 	var err error
@@ -97,7 +98,7 @@ func CreateURL(c *gin.Context) {
 		}
 	}
 
-	shortened, err := createURL(c, url, slug, password, expirationTime)
+	shortened, err := createURL(c, url, slug, password, expirationTime, mindful == "true")
 	if err != nil {
 		c.Error(err)
 		c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
@@ -161,6 +162,14 @@ func Get(c *gin.Context) {
 			}
 		}
 
+		if urlObj.Mindful {
+			c.HTML(http.StatusOK, "mindful.tmpl.html", gin.H{
+				"baseUrl": baseUrl,
+				"url":     urlObj.Url,
+			})
+			return
+		}
+
 		urlObj.Counter += 1
 		err = pg.UpdateURL(db, urlObj)
 		if err != nil {
@@ -191,6 +200,7 @@ func APICreateURL(c *gin.Context) {
 	slug := c.Query("alias")
 	password := c.Query("password")
 	expired := c.Query("expiration")
+	mindful := c.Query("mindful")
 
 	var expiration time.Time
 	if expired != "" {
@@ -206,7 +216,7 @@ func APICreateURL(c *gin.Context) {
 		expiration = time.Unix(i, 0)
 	}
 
-	shortened, err := createURL(c, url, slug, password, expiration)
+	shortened, err := createURL(c, url, slug, password, expiration, mindful == "true")
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -258,7 +268,7 @@ func APIGetURL(c *gin.Context) {
 	})
 }
 
-func createURL(c *gin.Context, url, slug, password string, expiration time.Time) (string, error) {
+func createURL(c *gin.Context, url, slug, password string, expiration time.Time, mindful bool) (string, error) {
 	db := middleware.GetDB(c)
 	_, qc := middleware.GetQue(c)
 
@@ -289,6 +299,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time)
 		Slug:    slug,
 		Created: time.Now(),
 		IP:      c.ClientIP(),
+		Mindful: mindful,
 	}
 
 	if password != "" {
