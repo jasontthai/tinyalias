@@ -41,13 +41,22 @@
                     </div>
                 </div>
                 <div id="accordion">
-                    <div id="collapseAlias" class="collapse show" aria-labelledby="headingOne">
-                        <h5>Set Alias</h5>
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon3">{{ .baseUrl }}</span>
+                    <div id="collapseAlias" class="row collapse show" aria-labelledby="headingOne">
+                        <div class="col">
+                            <h5>Set Alias</h5>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="basic-addon3">{{ .baseUrl }}</span>
+                                </div>
+                                <input type="text" class="form-control" name="SLUG" aria-describedby="basic-addon3" placeholder="Alias (optional)">
                             </div>
-                            <input type="text" class="form-control" name="SLUG" aria-describedby="basic-addon3" placeholder="Alias (optional)">
+                        </div>
+                        <div class="col-auto">
+                            <h5>Link Mindfulness</h5>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="mindful" name="MINDFUL" value="true">
+                                <label class="form-check-label" for="mindful" data-toggle="tooltip" data-placement="right" data-original-title="User will get a reminder to breathe and wait a few seconds before link redirects">Link Mindfulness</label>
+                            </div>
                         </div>
                     </div>
                     <div id="collapseOptions" class="row collapse" aria-labelledby="headingOne">
@@ -84,7 +93,7 @@
             </form>
 
             {{ if .url  }}
-                <h1 style="word-wrap: break-word"> <a style="color:white" id="url-id" href="#" data-clipboard-text={{.url}}>{{.url}}</a> <span id="copied"></span></h1>
+                <h1 style="word-wrap: break-word"> <a id="url-id" href="#" data-clipboard-text={{.url}}>{{.url}}</a> <span id="copied"><i class="fa fa-arrow-left"></i> click to copy </span></h1>
             {{ end }}
             {{ if .error }}
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -96,6 +105,9 @@
             {{ end }}
             <span><a style="color: #e9831a" href="/analytics">Got Links? Get Your Statistics Here</a></span>
         </div>
+
+
+        {{template "quotes.tmpl.html" . }}
 
     <script>
         var url = document.getElementById('url-id')
@@ -113,6 +125,9 @@
         $(function() {
             $('#datetimepicker1').datetimepicker()
         });
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
     </script>
 	</body>
     {{template "footer.tmpl.html" . }}
