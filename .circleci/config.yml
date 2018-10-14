@@ -31,8 +31,8 @@ jobs:
 
     steps:
       - checkout
-      - run: ssh-keyscan -H 138.68.50.109 >> ~/.ssh/known_hosts
-      - run: git remote add dokku dokku@138.68.50.109:test
+      - run: ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+      - run: git remote add dokku dokku@$SERVER_IP:test
       - run: git push dokku $CIRCLE_BRANCH
 
 workflows:
