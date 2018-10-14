@@ -133,6 +133,25 @@ func Get(c *gin.Context) {
 	}
 
 	if urlObj != nil {
+
+		urlObj.Counter += 1
+		err = pg.UpdateURL(db, urlObj)
+		if err != nil {
+			c.Error(err)
+		}
+
+		log.Debug("Dispatching job")
+		// Dispatch ParseGeoRequestJob
+		if err := queue.DispatchParseGeoRequestJob(qc, queue.ParseGeoRequest{
+			Slug: slug,
+			IP:   c.ClientIP(),
+		}); err != nil {
+			log.WithFields(log.Fields{
+				"slug": slug,
+				"ip":   c.ClientIP(),
+			}).WithError(err).Error("error sending queue job")
+		}
+
 		if urlObj.Status == "expired" || (urlObj.Expired.Valid && urlObj.Expired.Time.Before(time.Now())) {
 			c.Redirect(http.StatusFound, fmt.Sprintf("?%v=%v", ExpiredQuery, slug))
 			return
@@ -168,24 +187,6 @@ func Get(c *gin.Context) {
 				"url":     urlObj.Url,
 			})
 			return
-		}
-
-		urlObj.Counter += 1
-		err = pg.UpdateURL(db, urlObj)
-		if err != nil {
-			c.Error(err)
-		}
-
-		log.Debug("Dispatching job")
-		// Dispatch ParseGeoRequestJob
-		if err := queue.DispatchParseGeoRequestJob(qc, queue.ParseGeoRequest{
-			Slug: slug,
-			IP:   c.ClientIP(),
-		}); err != nil {
-			log.WithFields(log.Fields{
-				"slug": slug,
-				"ip":   c.ClientIP(),
-			}).WithError(err).Error("error sending queue job")
 		}
 
 		c.Redirect(http.StatusFound, urlObj.Url)
