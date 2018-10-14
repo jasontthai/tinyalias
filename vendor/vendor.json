@@ -383,12 +383,6 @@
 			"revisionTime": "2018-09-08T17:02:15Z"
 		},
 		{
-			"checksumSHA1": "898hHXEIWfscNt2k3+ViOG06Z0I=",
-			"path": "gopkg.in/gin-contrib/cors.v1",
-			"revision": "cf4846e6a636a76237a28d9286f163c132e841bc",
-			"revisionTime": "2017-03-18T12:53:40Z"
-		},
-		{
 			"checksumSHA1": "P/k5ZGf0lEBgpKgkwy++F7K1PSg=",
 			"path": "gopkg.in/go-playground/validator.v8",
 			"revision": "5f1438d3fca68893a817e4a66806cea46a9e4ebf",

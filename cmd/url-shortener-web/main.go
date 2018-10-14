@@ -19,7 +19,6 @@ import (
 	"github.com/zirius/url-shortener/middleware"
 	"github.com/zirius/url-shortener/modules/queue"
 	"github.com/zirius/url-shortener/modules/url"
-	"gopkg.in/gin-contrib/cors.v1"
 )
 
 func init() {
