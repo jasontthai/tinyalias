@@ -32,7 +32,7 @@ jobs:
     steps:
       - checkout
       - run: ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
-      - run: git remote add dokku dokku@$SERVER_IP:test
+      - run: git remote add dokku dokku@$SERVER_IP:tinyalias
       - run: git push dokku $CIRCLE_BRANCH
 
 workflows:
@@ -45,4 +45,4 @@ workflows:
         - build
         filters:
           branches:
-            only: circleci
+            only: master
