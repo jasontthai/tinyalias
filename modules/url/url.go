@@ -363,19 +363,7 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	}
 
 	if slug == "create" {
-		shortened, err := createURL(c, c.Query("url"), "", "", time.Time{})
-		if err != nil {
-			c.Error(err)
-			c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
-				"error": "Oops. Something went wrong. Please try again.",
-				BaseURL: baseUrl,
-			})
-		}
-
-		c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
-			"url":   shortened,
-			BaseURL: baseUrl,
-		})
+		APICreateURL(c)
 		handled = true
 	}
 	if slug == "favicon.ico" {

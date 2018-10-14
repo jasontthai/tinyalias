@@ -17,6 +17,7 @@ import (
 	"github.com/zirius/url-shortener/middleware"
 	"github.com/zirius/url-shortener/modules/queue"
 	"github.com/zirius/url-shortener/modules/url"
+	"gopkg.in/gin-contrib/cors.v1"
 )
 
 func init() {
@@ -66,6 +67,15 @@ func main() {
 	router.Use(middleware.Que(pgxpool, qc))
 	router.Use(mgin.NewMiddleware(limiter.New(store, rate)))
 	router.ForwardedByClientIP = true
+	router.Use(cors.New(cors.Config{
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Origin", "Content-Length", "Content-Type"},
+		AllowOriginFunc: func(origin string) bool {
+			return true
+		},
+		AllowCredentials: true,
+		MaxAge:           10 * time.Minute,
+	}))
 
 	if os.Getenv("NEW_RELIC_LICENSE_KEY") != "" {
 		config := newrelic.NewConfig(os.Getenv("APP_NAME"), os.Getenv("NEW_RELIC_LICENSE_KEY"))

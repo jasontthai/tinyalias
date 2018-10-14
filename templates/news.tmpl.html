@@ -32,17 +32,17 @@
 <div class="container">
 {{ if .articles }}
     {{/*<ul class="list-group">*/}}
-    {{ range .articles }}
+    {{ range $i, $e := .articles }}
         {{/*<li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center">*/}}
-        <form method="GET" action="create">
+        <form method="GET" id="form-{{ $i }}" class="forms" data-index="{{ $i }}" data-url="{{ .URL }}">
             <div class="card text-dark my-3">
                 <h5 class="card-header"><a href="{{ .URL }}">{{ .Title }}</a></h5>
-                <input type="hidden" name="url" id="url" value="{{ .URL }}">
                 <div class="card-body">
                     <p class="card-text">Description: {{ .Description }}</p>
                     <p class="card-text">Content: {{ .Content }}</p>
                     <p class="card-text">Date: {{ .PublishedAt }}</p>
-                    <button type="submit" id="submit" class="btn btn-primary">Get Short Link</button>
+                    <p class="card-text"><a id="href-{{ $i }}" href=""></a><span id="copied-{{ $i }}"></span></p>
+                    <button type="submit" id="submit-{{ $i }}" class="btn btn-primary">Get Short Link</button>
                 </div>
             </div>
         </form>
@@ -61,5 +61,34 @@
     <span><a style="color: #e9831a" href="https://newsapi.org">Powered by NewsAPI.org</a></span>
 </div>
 </body>
+<script>
+    $(document).ready(function(){
+        $('.forms').submit(function(e){
+            e.preventDefault(); //Prevent submit
+            var index = $(this).data('index');
+            var url = $(this).data('url');
+            //Make ajax call for current form
+            $.get("/create?url=" + url).done(function (data) {
+                $('#href-' + index).html(data.short);
+                $('#href-' + index).attr('href', data.short);
+                $('#href-' + index).attr('data-clipboard-text', data.short);
+                $('#copied-' + index).html(' <i class="fa fa-arrow-left"></i> click to copy');
+                $('#submit-' + index).remove();
+
+                var btn = document.getElementById('href-'+index);
+                var clipboard = new ClipboardJS(btn);
+                clipboard.on('success', function(e) {
+                    console.log(e);
+                    $('#copied-' + index).html(' Copied!');
+                });
+                clipboard.on('error', function(e) {
+                    console.log(e);
+                });
+            })
+        })
+    });
+
+
+</script>
 {{template "footer.tmpl.html" . }}
 </html>
