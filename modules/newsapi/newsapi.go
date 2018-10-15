@@ -58,5 +58,15 @@ func (c *Client) GetTopHeadlines() ([]models.Article, error) {
 		return nil, fmt.Errorf(res.Message)
 	}
 
-	return res.Articles, nil
+	return filterArticle(res.Articles), nil
+}
+
+func filterArticle(articles []models.Article) []models.Article {
+	var res []models.Article
+	for _, a := range articles {
+		if a.Content != "" && a.Description != "" && a.Title != "" {
+			res = append(res, a)
+		}
+	}
+	return res
 }

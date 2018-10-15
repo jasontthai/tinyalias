@@ -41,6 +41,7 @@
                     <p class="card-text">Description: {{ .Description }}</p>
                     <p class="card-text">Content: {{ .Content }}</p>
                     <p class="card-text">Date: {{ .PublishedAt }}</p>
+                    <p class="card-text">Source: {{ .Source.Name }}</p>
                     <p class="card-text"><a id="href-{{ $i }}" href=""></a><span id="copied-{{ $i }}"></span></p>
                     <button type="submit" id="submit-{{ $i }}" class="btn btn-primary">Get Short Link</button>
                 </div>
