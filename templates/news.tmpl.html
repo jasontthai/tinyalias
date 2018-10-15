@@ -71,7 +71,7 @@
             //Make ajax call for current form
             $.get("/create?url=" + url).done(function (data) {
                 $('#href-' + index).html(data.short);
-                $('#href-' + index).attr('href', '#/');
+                $('#href-' + index).attr('href', "javascript:void(0);");
                 $('#href-' + index).attr('data-clipboard-text', data.short);
                 $('#copied-' + index).html(' <i class="fa fa-arrow-left"></i> click to copy');
                 $('#submit-' + index).remove();
