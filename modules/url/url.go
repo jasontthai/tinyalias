@@ -397,10 +397,12 @@ func handleSpecialRoutes(c *gin.Context) bool {
 			c.Error(err)
 			c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
 				"error": err.Error(),
+				BaseURL: baseUrl,
 			})
 		} else {
 			c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
 				"articles": articles,
+				BaseURL:    baseUrl,
 			})
 		}
 		handled = true
