@@ -371,7 +371,7 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = true
 	}
 	if slug == "robots.txt" {
-		c.String(http.StatusOK, "User-agent: *")
+		c.File("./static/robots.txt")
 		handled = true
 	}
 	if slug == "analytics" {
