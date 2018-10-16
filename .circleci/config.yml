@@ -40,8 +40,8 @@ jobs:
       - run:
           name: Populate Postgres
           command: |
-            psql -f sql/init.sql
-            psql -f vendor/github.com/bgentry/que-go/schema.sql
+            psql -d postgresql://root@localhost/circle_test -f sql/init.sql
+            psql -d postgresql://root@localhost/circle_test -f vendor/github.com/bgentry/que-go/schema.sql
 
       - run: go test -v ./...
 
