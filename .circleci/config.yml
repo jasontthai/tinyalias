@@ -43,7 +43,11 @@ jobs:
             psql -d postgresql://root@localhost/circle_test -f sql/init.sql
             psql -d postgresql://root@localhost/circle_test -f /go/src/github.com/bgentry/que-go/schema.sql
 
-      - run: go test -v ./...
+      - run:
+          name: Run Tests
+          environment:
+            DATABASE_URL = "postgresql://root@localhost:5432/circle_test?sslmode=disable"
+          command: go test -v ./...
 
   deploy:
     machine:
