@@ -62,9 +62,7 @@ func main() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.LoadHTMLGlob("templates/*.tmpl.html")
-	//router.Static("/static", "static")
 	router.Use(middleware.Database(database))
-	router.Use(middleware.GeoIP())
 	router.Use(middleware.Que(pgxpool, qc))
 	router.Use(mgin.NewMiddleware(limiter.New(store, rate)))
 	router.ForwardedByClientIP = true
