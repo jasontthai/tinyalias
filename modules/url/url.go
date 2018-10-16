@@ -3,7 +3,6 @@ package url
 import (
 	"database/sql"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"os"
 	"sort"
@@ -18,6 +17,7 @@ import (
 	"github.com/zirius/url-shortener/models"
 	"github.com/zirius/url-shortener/modules/newsapi"
 	"github.com/zirius/url-shortener/modules/queue"
+	"github.com/zirius/url-shortener/modules/utils"
 	"github.com/zirius/url-shortener/pg"
 )
 
@@ -32,7 +32,6 @@ func init() {
 }
 
 const (
-	base          = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
 	NotFoundQuery = "not-found"
 	ExpiredQuery  = "expired"
 	ThreatQuery   = "threat"
@@ -293,7 +292,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 	}
 
 	if slug == "" {
-		slug = generateSlug(6)
+		slug = utils.GenerateSlug(6)
 	}
 
 	urlObj = &models.URL{
@@ -333,18 +332,6 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		"original": url,
 	}).Info("Shortened URL generated")
 	return shortened, nil
-}
-
-func generateSlug(size int) string {
-	s := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(s)
-
-	var slug string
-	for i := 0; i < size; i++ {
-		idx := r.Intn(len(base))
-		slug = slug + string(base[idx])
-	}
-	return slug
 }
 
 func handleSpecialRoutes(c *gin.Context) bool {
