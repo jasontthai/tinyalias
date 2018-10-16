@@ -26,7 +26,6 @@ jobs:
       - checkout
       - run: sudo apt-get update
       - run: sudo apt-get install postgresql-client-9.6
-      - run: go get -v -t -d ./...
       - run:
           name: Waiting for Postgres to be ready
           command: |
@@ -37,6 +36,7 @@ jobs:
               sleep 1
             done
             echo Failed waiting for Postgres && exit 1
+      - run: go get -v -t -d ./...
       - run:
           name: Populate Postgres
           command: |
