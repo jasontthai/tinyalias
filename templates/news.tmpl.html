@@ -2,14 +2,12 @@
 <html lang="en">
 {{template "header.tmpl.html" . }}
 <body class="bg-dark">
-
 <nav class="navbar navbar-expand-sm navbar-dark py-5">
     <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
         <a class="navbar-brand mb-0 h1" href="/">TinyAlias</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav">
                 <li class="nav-item">
@@ -28,28 +26,35 @@
         </div>
     </div>
 </nav>
-
 <div class="container">
 {{ if .articles }}
-    {{/*<ul class="list-group">*/}}
-    {{ range $i, $e := .articles }}
-        {{/*<li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center">*/}}
-        <form method="GET" id="form-{{ $i }}" class="forms" data-index="{{ $i }}" data-url="{{ .URL }}">
-            <div class="card text-dark my-3">
-                <h5 class="card-header"><a href="{{ .URL }}">{{ .Title }}</a></h5>
-                <div class="card-body">
-                    <p class="card-text">Description: {{ .Description }}</p>
-                    <p class="card-text">Content: {{ .Content }}</p>
-                    <p class="card-text">Date: {{ .PublishedAt }}</p>
-                    <p class="card-text">Source: {{ .Source.Name }}</p>
-                    <p class="card-text"><a id="href-{{ $i }}" href=""></a><span id="copied-{{ $i }}"></span></p>
-                    <button type="submit" id="submit-{{ $i }}" class="btn btn-primary">Get Short Link</button>
-                </div>
+{{/*
+			<ul class="list-group">
+				*/}}
+{{ range $i, $e := .articles }}
+{{/*
+				<li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center">
+					*/}}
+    <form method="GET" id="form-{{ $i }}" class="forms" data-index="{{ $i }}" data-url="{{ .URL }}">
+        <div class="card text-dark my-3">
+            <h5 class="card-header"><a href="{{ .URL }}">{{ .Title }}</a></h5>
+            <div class="card-body">
+                <p class="card-text">Description: {{ .Description }}</p>
+                <p class="card-text">Content: {{ .Content }}</p>
+                <p class="card-text">Date: {{ .PublishedAt }}</p>
+                <p class="card-text">Source: {{ .Source.Name }}</p>
+                <p class="card-text"><a id="href-{{ $i }}" href=""></a><span id="copied-{{ $i }}"></span></p>
+                <button type="submit" id="submit-{{ $i }}" class="btn btn-primary">Get Short Link</button>
             </div>
-        </form>
-        {{/*</li>*/}}
-    {{ end }}
-    {{/*</ul>*/}}
+        </div>
+    </form>
+{{/*
+				</li>
+				*/}}
+{{ end }}
+{{/*
+			</ul>
+			*/}}
 {{ end }}
 {{ if .error }}
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -62,6 +67,7 @@
     <span><a style="color: #e9831a" href="https://newsapi.org">Powered by NewsAPI.org</a></span>
 </div>
 </body>
+{{template "footer.tmpl.html" . }}
 <script>
     $(document).ready(function(){
         $('.forms').submit(function(e){
@@ -88,8 +94,5 @@
             })
         })
     });
-
-
 </script>
-{{template "footer.tmpl.html" . }}
 </html>
