@@ -7,8 +7,12 @@ jobs:
     docker:
       # specify the version
       - image: circleci/golang:1.10.4
-      
-      # Specify service dependencies here if necessary
+      - image: circleci/postgres:9.4.12-alpine
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: circle_test
+
+    # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/postgres:9.4
@@ -23,6 +27,22 @@ jobs:
 
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
+      - run:
+          name: Waiting for Postgres to be ready
+          command: |
+            for i in `seq 1 10`;
+            do
+              nc -z localhost 5432 && echo Success && exit 0
+              echo -n .
+              sleep 1
+            done
+            echo Failed waiting for Postgres && exit 1
+      - run:
+          name: Populate Postgres
+          command: |
+            psql -f sql/init.sql
+            psql -f vendor/github.com/bgentry/que-go/schema.sql
+
       - run: go test -v ./...
 
   deploy:
