@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/zirius/url-shortener/models"
-	"github.com/zirius/url-shortener/modules/utils"
+	"github.com/zirius/tinyalias/models"
+	"github.com/zirius/tinyalias/modules/utils"
 )
 
 func TestURLStat(t *testing.T) {

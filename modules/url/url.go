@@ -13,12 +13,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
-	"github.com/zirius/url-shortener/middleware"
-	"github.com/zirius/url-shortener/models"
-	"github.com/zirius/url-shortener/modules/newsapi"
-	"github.com/zirius/url-shortener/modules/queue"
-	"github.com/zirius/url-shortener/modules/utils"
-	"github.com/zirius/url-shortener/pg"
+	"github.com/zirius/tinyalias/middleware"
+	"github.com/zirius/tinyalias/models"
+	"github.com/zirius/tinyalias/modules/newsapi"
+	"github.com/zirius/tinyalias/modules/queue"
+	"github.com/zirius/tinyalias/modules/utils"
+	"github.com/zirius/tinyalias/pg"
 )
 
 var baseUrl string
