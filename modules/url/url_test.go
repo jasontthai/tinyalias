@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/zirius/url-shortener/modules/utils"
-	"github.com/zirius/url-shortener/test"
+	"github.com/zirius/tinyalias/modules/utils"
+	"github.com/zirius/tinyalias/test"
 )
 
 func TestCreateURL(t *testing.T) {

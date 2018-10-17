@@ -11,14 +11,14 @@ import (
 	"github.com/ulule/limiter"
 	mgin "github.com/ulule/limiter/drivers/middleware/gin"
 	"github.com/ulule/limiter/drivers/store/memory"
-	"github.com/zirius/url-shortener/middleware"
-	"github.com/zirius/url-shortener/modules/queue"
+	"github.com/zirius/tinyalias/middleware"
+	"github.com/zirius/tinyalias/modules/queue"
 )
 
 func GetTestPgURL() string {
 	database := os.Getenv("DATABASE_URL")
 	if database == "" {
-		database = "postgres://localhost:12345/postgres?sslmode=disable"
+		database = "postgres://postgres@localhost:5432/postgres?sslmode=disable"
 	}
 	return database
 }

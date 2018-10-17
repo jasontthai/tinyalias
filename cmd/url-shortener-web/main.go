@@ -16,9 +16,9 @@ import (
 	"github.com/ulule/limiter"
 	mgin "github.com/ulule/limiter/drivers/middleware/gin"
 	"github.com/ulule/limiter/drivers/store/memory"
-	"github.com/zirius/url-shortener/middleware"
-	"github.com/zirius/url-shortener/modules/queue"
-	"github.com/zirius/url-shortener/modules/url"
+	"github.com/zirius/tinyalias/middleware"
+	"github.com/zirius/tinyalias/modules/queue"
+	"github.com/zirius/tinyalias/modules/url"
 )
 
 func init() {

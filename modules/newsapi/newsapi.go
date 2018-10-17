@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/zirius/url-shortener/models"
+	"github.com/zirius/tinyalias/models"
 )
 
 type NewsAPIResponse struct {

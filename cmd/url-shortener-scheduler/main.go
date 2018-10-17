@@ -5,7 +5,7 @@ import (
 
 	_ "github.com/heroku/x/hmetrics/onload"
 	log "github.com/sirupsen/logrus"
-	"github.com/zirius/url-shortener/modules/queue"
+	"github.com/zirius/tinyalias/modules/queue"
 )
 
 func init() {
