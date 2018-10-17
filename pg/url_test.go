@@ -6,9 +6,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
-	"github.com/zirius/url-shortener/models"
-	"github.com/zirius/url-shortener/modules/utils"
-	"github.com/zirius/url-shortener/test"
+	"github.com/zirius/tinyalias/models"
+	"github.com/zirius/tinyalias/modules/utils"
+	"github.com/zirius/tinyalias/test"
 )
 
 func setup(t *testing.T) *sqlx.DB {
