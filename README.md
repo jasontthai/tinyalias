@@ -16,7 +16,7 @@ This installation guide assume you have already have installed postgres and hero
 * Create .env file in code dir with these values:
   * `DATABASE_URL` : postgres db uri
   * `APP_NAME` : app name e.g. `test-tinyalias`
-  * `BASE_URL` : for local run use `localhost:5000`
+  * `BASE_URL` : for local run use `localhost:5000/`
   * `GOOGLE_API_KEY` : used for Google safebrowsing API
 
 # Local Run
