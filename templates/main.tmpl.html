@@ -102,7 +102,7 @@
 {{ end }}
     <span><a href="/analytics">Got Links? Get Your Statistics Here</a></span>
     <br/>
-    <span>Use our bookmarklet. Click and drag <a href="javascript:void(location.href='{{ .baseUrl }}shorten?url='+encodeURIComponent(location.href))">TinyAlias</a> to your browser's toolbar</span>
+    <span>Use our bookmarklet. Click and drag <a href="javascript:void(open('{{ .baseUrl }}shorten?url='+encodeURIComponent(location.href), 'TinyAlias'))" onmouseover="window.status='';return true" onclick="return false">TinyAlias</a> to your browser's toolbar</span>
 </div>
 </body>
 {{template "footer.tmpl.html" . }}
