@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -23,12 +24,14 @@ import (
 
 var baseUrl string
 var secret string
+var tinyUrlRegexp *regexp.Regexp
 
 func init() {
 	baseUrl = os.Getenv("BASE_URL")
 
 	// secret in order to use API GET route
 	secret = os.Getenv("SECRET")
+	tinyUrlRegexp = regexp.MustCompile(os.Getenv("BASE_URL") + "(.+)")
 }
 
 const (
@@ -46,11 +49,12 @@ type APIResponse struct {
 	Original   string `json:"original"`
 	Password   string `json:"password,omitempty"`
 	Expiration int64  `json:"expiration,omitempty"`
+	Message    string `json:"message,omitempty"`
 }
 
 func GetHomePage(c *gin.Context) {
 	if strings.Contains(c.Request.Host, "api") {
-		APIGetURL(c)
+		APIGetURLs(c)
 		return
 	}
 
@@ -244,6 +248,75 @@ func APICreateURL(c *gin.Context) {
 }
 
 func APIGetURL(c *gin.Context) {
+	db := middleware.GetDB(c)
+	fmt.Println(c.Query("url"))
+	fmt.Println(tinyUrlRegexp.String())
+	submatches := tinyUrlRegexp.FindStringSubmatch(c.Query("url"))
+	if len(submatches) < 2 {
+		c.JSON(http.StatusOK, APIResponse{
+			Success: true,
+		})
+		return
+	}
+	slug := submatches[1]
+	url, err := pg.GetURL(db, "", slug)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
+			return
+		}
+		c.JSON(http.StatusOK, APIResponse{
+			Success: true,
+		})
+		return
+	}
+	if url.Status == "expired" || (url.Expired.Valid && url.Expired.Time.Before(time.Now())) {
+		c.JSON(http.StatusOK, APIResponse{
+			Success: true,
+			Message: "link expired",
+		})
+		return
+	}
+
+	// return spammed
+	if url.Status != "active" {
+		c.JSON(http.StatusOK, APIResponse{
+			Success: true,
+			Message: url.Status,
+		})
+		return
+	}
+
+	if url.Password != "" {
+		if c.Query("password") != "" {
+			err = models.VerifyPassword(url.Password, c.Query("password"))
+			if err != nil {
+				c.JSON(http.StatusBadRequest, APIResponse{
+					Success: false,
+					Error:   "invalid password",
+				})
+				return
+			}
+		} else {
+			c.JSON(http.StatusBadRequest, APIResponse{
+				Success: false,
+				Error:   "password is required",
+			})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, APIResponse{
+		Short:    submatches[0],
+		Original: url.Url,
+	})
+	return
+}
+
+func APIGetURLs(c *gin.Context) {
 	secretQuery := c.Query("secret")
 	if secret != secretQuery {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -343,6 +416,8 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	if strings.Contains(c.Request.Host, "api") {
 		if slug == "create" {
 			APICreateURL(c)
+		} else if slug == "get" {
+			APIGetURL(c)
 		} else {
 			c.JSON(http.StatusNotFound, gin.H{
 				"success": false,
@@ -422,30 +497,14 @@ func handleSpecialRoutes(c *gin.Context) bool {
 func GetAnalytics(c *gin.Context) {
 	db := middleware.GetDB(c)
 
-	tinyURLStr := strings.TrimSpace(c.Query("url"))
-	if tinyURLStr == "" {
+	submatches := tinyUrlRegexp.FindStringSubmatch(c.Query("url"))
+	if len(submatches) < 2 {
 		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
 			BaseURL: baseUrl,
 		})
 		return
 	}
-
-	strSlice := strings.Split(tinyURLStr, "/")
-	if len(strSlice) == 0 {
-		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
-			"error": "Invalid URL. Try again.",
-			BaseURL: baseUrl,
-		})
-		return
-	}
-	slug := strSlice[len(strSlice)-1]
-	if slug == "" {
-		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
-			"error": "Invalid URL. Try again.",
-			BaseURL: baseUrl,
-		})
-		return
-	}
+	slug := submatches[1]
 
 	stats, err := pg.GetURLStats(db, map[string]interface{}{
 		"slug": slug,
@@ -475,13 +534,13 @@ func GetAnalytics(c *gin.Context) {
 	sort.Slice(analytics, func(i, j int) bool { return analytics[i].Count > analytics[j].Count })
 
 	log.WithFields(log.Fields{
-		"url":       tinyURLStr,
+		"url":       c.Query("url"),
 		"count":     counter,
 		"analytics": analytics,
 	}).Info("Returned values")
 
 	c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
-		"url":       tinyURLStr,
+		"url":       c.Query("url"),
 		"count":     counter,
 		"analytics": analytics,
 		BaseURL:     baseUrl,
