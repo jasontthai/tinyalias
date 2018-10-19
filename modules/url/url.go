@@ -27,11 +27,11 @@ var secret string
 var tinyUrlRegexp *regexp.Regexp
 
 func init() {
-	baseUrl = os.Getenv("BASE_URL")
+	baseUrl = fmt.Sprintf("https://%v/", os.Getenv("BASE_URL"))
 
 	// secret in order to use API GET route
 	secret = os.Getenv("SECRET")
-	tinyUrlRegexp = regexp.MustCompile(os.Getenv("BASE_URL") + "(.+)")
+	tinyUrlRegexp = regexp.MustCompile(fmt.Sprintf("%v/%v", os.Getenv("BASE_URL"), "(.+)"))
 }
 
 const (
