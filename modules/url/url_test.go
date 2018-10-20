@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,16 +15,13 @@ import (
 
 func TestCreateURL(t *testing.T) {
 	router := test.GetTestRouter()
-	router.POST("/", CreateURL)
+	router.GET("/", CreateURL)
 	router.GET("/:slug", Get)
 	slug := utils.GenerateSlug(6)
 
 	{
 		w := httptest.NewRecorder()
-		data := url.Values{}
-		data.Add("URL", "example.com")
-		data.Add("SLUG", slug)
-		req, _ := http.NewRequest("POST", "/", strings.NewReader(data.Encode()))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/?url=%v&alias=%v", "example.com", slug), nil)
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		router.ServeHTTP(w, req)
 		assert.Equal(t, 200, w.Code)

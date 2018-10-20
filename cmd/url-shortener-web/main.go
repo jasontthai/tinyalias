@@ -87,7 +87,6 @@ func main() {
 	}
 
 	router.GET("", url.GetHomePage)
-	router.POST("", url.CreateURL)
 	router.GET("/:slug", url.Get)
 
 	router.Run(":" + port)

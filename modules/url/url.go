@@ -81,11 +81,11 @@ func GetHomePage(c *gin.Context) {
 }
 
 func CreateURL(c *gin.Context) {
-	url := c.PostForm("URL")
-	slug := c.PostForm("SLUG")
-	expiration := c.PostForm("EXPIRATION")
-	password := c.PostForm("PASSWORD")
-	mindful := c.PostForm("MINDFUL")
+	url := c.Query("url")
+	slug := c.Query("alias")
+	expiration := c.Query("expiration")
+	password := c.PostForm("password")
+	mindful := c.PostForm("mindful")
 
 	var expirationTime time.Time
 	var err error
@@ -431,24 +431,8 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = true
 	}
 	if slug == "shorten" {
+		CreateURL(c)
 		handled = true
-		url := c.Query("url")
-		shortened, err := createURL(c, url, "", "", time.Time{}, false)
-		if err != nil {
-			c.Error(err)
-			c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
-				"error":    "Oops. Something went wrong. Please try again.",
-				BaseURL:    baseUrl,
-				"original": url,
-			})
-			return handled
-		}
-
-		c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
-			"url":      shortened,
-			BaseURL:    baseUrl,
-			"original": url,
-		})
 	}
 	if slug == "favicon.ico" {
 		c.File("./static/favicon.ico")
@@ -475,23 +459,27 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	}
 
 	if slug == "news" {
-		client := newsapi.NewClient(os.Getenv("NEWS_API_KEY"))
-		articles, err := client.GetTopHeadlines()
-		if err != nil {
-			c.Error(err)
-			c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
-				"error": err.Error(),
-				BaseURL: baseUrl,
-			})
-		} else {
-			c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
-				"articles": articles,
-				BaseURL:    baseUrl,
-			})
-		}
+		GetNews(c)
 		handled = true
 	}
 	return handled
+}
+
+func GetNews(c *gin.Context) {
+	client := newsapi.NewClient(os.Getenv("NEWS_API_KEY"))
+	articles, err := client.GetTopHeadlines()
+	if err != nil {
+		c.Error(err)
+		c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
+			"error": err.Error(),
+			BaseURL: baseUrl,
+		})
+	} else {
+		c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
+			"articles": articles,
+			BaseURL:    baseUrl,
+		})
+	}
 }
 
 func GetAnalytics(c *gin.Context) {
