@@ -84,8 +84,8 @@ func CreateURL(c *gin.Context) {
 	url := c.Query("url")
 	slug := c.Query("alias")
 	expiration := c.Query("expiration")
-	password := c.PostForm("password")
-	mindful := c.PostForm("mindful")
+	password := c.Query("password")
+	mindful := c.Query("mindful")
 
 	var expirationTime time.Time
 	var err error
