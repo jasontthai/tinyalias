@@ -5,3 +5,4 @@ app.json linguist-documentation
 heroku.yml linguist-documentation
 Procfile linguist-documentation
 Makefile linguist-documentation
+*.mmdb filter=lfs diff=lfs merge=lfs -text
