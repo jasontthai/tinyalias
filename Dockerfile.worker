@@ -1,0 +1,11 @@
+FROM golang:1.10-alpine
+
+COPY . /go/src/github.com/zirius/url-shortener
+WORKDIR /go/src/github.com/zirius/url-shortener
+
+RUN go install ./cmd/url-shortener-worker
+
+RUN adduser -D myuser
+USER myuser
+
+CMD /go/bin/url-shortener-worker

@@ -1,0 +1,16 @@
+<div class="container pt-5">
+    <blockquote class="blockquote text-center">
+        <p class="mb-0" id="quote-content"></p>
+        <footer class="blockquote-footer" id="quote-author"></footer>
+    </blockquote>
+</div>
+<script>
+    $.ajax( {
+        url: 'https://favqs.com/api/qotd',
+        success: function(data) {
+            $('#quote-author').text(data.quote.author);
+            $('#quote-content').html(`<i>&quot;`+data.quote.body+`&quot;</i>`);
+        },
+        cache: false
+    });
+</script>
