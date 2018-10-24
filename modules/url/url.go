@@ -480,7 +480,7 @@ func handleSpecialRoutes(c *gin.Context) bool {
 }
 
 func HandleCopySignal(c *gin.Context) {
-	url := c.Query("url")
+	url := c.Query("copied")
 	log.WithField("url", url).Info("Copied")
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
