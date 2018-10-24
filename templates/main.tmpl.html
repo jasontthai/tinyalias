@@ -33,7 +33,7 @@
                 <span class="input-group-text" id="longURLHelp">URL</span>
             </div>
             {{ if .url }}
-                <input style="color: #e9831a; background-color: #e9deda" type="text" class="form-control" name="url" value="{{ .url }}" aria-label="url" aria-describedby="longURLHelp">
+                <input style="color: #e9831a; background-color: #e9deda" type="text" class="form-control" name="url" value="{{ .url }}" readonly="readonly" disabled aria-label="url" aria-describedby="longURLHelp">
                 <div class="input-group-append justify-content-center">
                     <a class="btn" id="copy-btn" data-clipboard-text={{.url}}>Copy</a>
                 </div>
