@@ -40,6 +40,7 @@ const (
 	ThreatQuery   = "threat"
 	SlugQuery     = "slug"
 	BaseURL       = "baseUrl"
+	XForwardedHeader = "X-Forwarded-For"
 )
 
 type APIResponse struct {
@@ -149,9 +150,8 @@ func Get(c *gin.Context) {
 		log.Debug("Dispatching job")
 
 		ip := c.ClientIP()
-		if c.GetHeader("X-Forwarded-For") != "" {
-			log.WithField("X-Forwarded-For", c.GetHeader("X-Forwarded-For")).Info("Got forwarded IP")
-			ip = c.GetHeader("X-Forwarded-For")
+		if c.GetHeader(XForwardedHeader) != "" {
+			ip = c.GetHeader(XForwardedHeader)
 		}
 		// Dispatch ParseGeoRequestJob
 		if err := queue.DispatchParseGeoRequestJob(qc, queue.ParseGeoRequest{
@@ -376,11 +376,16 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		slug = utils.GenerateSlug(6)
 	}
 
+	ip := c.ClientIP()
+	if c.GetHeader(XForwardedHeader) != "" {
+		ip = c.GetHeader(XForwardedHeader)
+	}
+
 	urlObj = &models.URL{
 		Url:     url,
 		Slug:    slug,
 		Created: time.Now(),
-		IP:      c.ClientIP(),
+		IP:      ip,
 		Mindful: mindful,
 	}
 
