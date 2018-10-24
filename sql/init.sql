@@ -27,7 +27,7 @@ ALTER TABLE urls
 CREATE INDEX idx_counter ON urls USING btree (counter);
 
 ALTER TABLE urls
-  ADD COLUMN status text NOT NULL DEFAULT 'active';
+  ADD COLUMN status text NOT NULL DEFAULT 'pending';
 
 CREATE TABLE IF NOT EXISTS url_stats (
   slug text NOT NULL,

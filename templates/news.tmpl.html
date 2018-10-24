@@ -87,6 +87,13 @@
                 clipboard.on('success', function(e) {
                     console.log(e);
                     $('#copied-' + index).html(' Copied!');
+
+                    $.ajax( {
+                        url: '/signal?copied=' + data.short,
+                        success: function(data) {
+                        },
+                        cache: false
+                    });
                 });
                 clipboard.on('error', function(e) {
                     console.log(e);

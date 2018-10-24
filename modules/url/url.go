@@ -103,7 +103,7 @@ func CreateURL(c *gin.Context) {
 		}
 	}
 
-	shortened, err := createURL(c, url, slug, password, expirationTime, mindful == "true", false)
+	shortened, err := createURL(c, url, slug, password, expirationTime, mindful == "true")
 	if err != nil {
 		c.Error(err)
 		c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
@@ -142,12 +142,14 @@ func Get(c *gin.Context) {
 	if urlObj != nil {
 
 		urlObj.Counter += 1
+		// Update from pending to active if link is clicked
+		if urlObj.Status == models.Pending {
+			urlObj.Status = models.Active
+		}
 		err = pg.UpdateURL(db, urlObj)
 		if err != nil {
 			c.Error(err)
 		}
-
-		log.Debug("Dispatching job")
 
 		ip := c.ClientIP()
 		if c.GetHeader(XForwardedHeader) != "" {
@@ -229,7 +231,7 @@ func APICreateURL(c *gin.Context) {
 		expiration = time.Unix(i, 0)
 	}
 
-	shortened, err := createURL(c, url, slug, password, expiration, mindful == "true", true)
+	shortened, err := createURL(c, url, slug, password, expiration, mindful == "true")
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -277,6 +279,7 @@ func APIGetURL(c *gin.Context) {
 		})
 		return
 	}
+
 	if url.Status == "expired" || (url.Expired.Valid && url.Expired.Time.Before(time.Now())) {
 		c.JSON(http.StatusOK, APIResponse{
 			Success: true,
@@ -286,7 +289,7 @@ func APIGetURL(c *gin.Context) {
 	}
 
 	// return spammed
-	if url.Status != models.Active {
+	if url.Status != models.Active && url.Status != models.Pending {
 		c.JSON(http.StatusOK, APIResponse{
 			Success: true,
 			Message: url.Status,
@@ -348,7 +351,7 @@ func APIGetURLs(c *gin.Context) {
 	})
 }
 
-func createURL(c *gin.Context, url, slug, password string, expiration time.Time, mindful bool, isAPI bool) (string, error) {
+func createURL(c *gin.Context, url, slug, password string, expiration time.Time, mindful bool) (string, error) {
 	db := middleware.GetDB(c)
 	_, qc := middleware.GetQue(c)
 
@@ -379,18 +382,12 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		ip = c.GetHeader(XForwardedHeader)
 	}
 
-	status := models.Active
-	if !isAPI {
-		status = models.Pending
-	}
-
 	urlObj = &models.URL{
 		Url:     url,
 		Slug:    slug,
 		Created: time.Now(),
 		IP:      ip,
 		Mindful: mindful,
-		Status:  status,
 	}
 
 	if password != "" {
@@ -431,8 +428,6 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	if strings.Contains(c.Request.Host, "api") {
 		if slug == "create" {
 			APICreateURL(c)
-		} else if slug == "get" {
-			APIGetURL(c)
 		} else {
 			c.JSON(http.StatusNotFound, gin.H{
 				"success": false,
@@ -508,7 +503,7 @@ func HandleCopySignal(c *gin.Context) {
 		return
 	}
 
-	// Set status to active
+	// Set status to active if copied
 	urlObj.Status = models.Active
 
 	err = pg.UpdateURL(db, urlObj)
