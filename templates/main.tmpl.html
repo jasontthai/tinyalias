@@ -121,6 +121,13 @@
         clipboard.on('success', function(e) {
             copyBtn.innerHTML = "Copied!"
             console.log(e);
+
+            $.ajax( {
+                url: '/signal?copied=' + copyBtn.getAttribute("data-clipboard-text"),
+                success: function(data) {
+                },
+                cache: false
+            });
         });
         clipboard.on('error', function(e) {
             console.log(e);

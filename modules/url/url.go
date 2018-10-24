@@ -436,7 +436,10 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		}
 		return true
 	}
-
+	if slug == "signal" {
+		HandleCopySignal(c)
+		handled = true
+	}
 	if slug == "create" {
 		APICreateURL(c)
 		handled = true
@@ -474,6 +477,14 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = true
 	}
 	return handled
+}
+
+func HandleCopySignal(c *gin.Context) {
+	url := c.Query("url")
+	log.WithField("url", url).Info("Copied")
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+	})
 }
 
 func GetNews(c *gin.Context) {
