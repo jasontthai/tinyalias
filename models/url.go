@@ -8,6 +8,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const (
+	Active = "active"
+	Pending = "pending"
+	Expired = "expired"
+)
+
 type URL struct {
 	Url      string    `json:"url" db:"url"`
 	Slug     string    `json:"slug" db:"slug"`

@@ -42,6 +42,7 @@ func main() {
 
 	queue.DispatchDetectSpamJob(qc, "")
 	queue.DispatchExpirationJob(qc)
+	queue.DispatchRemovePendingJob(qc)
 
 	//loop:
 	//	for {

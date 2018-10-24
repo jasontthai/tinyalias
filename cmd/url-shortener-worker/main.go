@@ -88,7 +88,6 @@ func RunDetectSpamJob(j *que.Job) error {
 		log.WithField("limit", limit).WithField("offset", offset).Debug("Getting URLs")
 
 		clauses := make(map[string]interface{})
-		clauses["status"] = "active"
 		clauses["_limit"] = limit
 		clauses["_offset"] = offset
 
@@ -136,6 +135,12 @@ func RunExpirationJob(j *que.Job) error {
 	return err
 }
 
+func RunRemovePendingJob(j *que.Job) error {
+	log.Info("Running Remove Pending Job")
+	_, err := db.Exec("DELETE FROM urls WHERE status = 'pending'")
+	return err
+}
+
 func main() {
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
@@ -172,6 +177,7 @@ func main() {
 		queue.ParseGeoRequestJob: RunParseGeoRequestJob,
 		queue.DetectSpamJob:      RunDetectSpamJob,
 		queue.ExpirationJob:      RunExpirationJob,
+		queue.RemovePendingJob:   RunRemovePendingJob,
 	}
 
 	// 1 worker go routine

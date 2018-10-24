@@ -95,8 +95,8 @@ func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) 
 
 func CreateURL(db *sqlx.DB, url *models.URL) error {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Insert("urls").Columns("url, slug, ip, counter, created, updated, password, expired, mindful").
-		Values(url.Url, url.Slug, url.IP, url.Counter, url.Created, url.Updated, url.Password, url.Expired, url.Mindful)
+	sb := psql.Insert("urls").Columns("url, slug, ip, counter, created, updated, password, expired, mindful, status").
+		Values(url.Url, url.Slug, url.IP, url.Counter, url.Created, url.Updated, url.Password, url.Expired, url.Mindful, url.Status)
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
 		return err
