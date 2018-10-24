@@ -147,14 +147,20 @@ func Get(c *gin.Context) {
 		}
 
 		log.Debug("Dispatching job")
+
+		ip := c.ClientIP()
+		if c.GetHeader("X-Forwarded-For") != "" {
+			log.WithField("X-Forwarded-For", c.GetHeader("X-Forwarded-For")).Info("Got forwarded IP")
+			ip = c.GetHeader("X-Forwarded-For")
+		}
 		// Dispatch ParseGeoRequestJob
 		if err := queue.DispatchParseGeoRequestJob(qc, queue.ParseGeoRequest{
 			Slug: slug,
-			IP:   c.ClientIP(),
+			IP:   ip,
 		}); err != nil {
 			log.WithFields(log.Fields{
 				"slug": slug,
-				"ip":   c.ClientIP(),
+				"ip":   ip,
 			}).WithError(err).Error("error sending queue job")
 		}
 
