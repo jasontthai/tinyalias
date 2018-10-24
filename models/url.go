@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	Active = "active"
+	Active  = "active"
 	Pending = "pending"
 	Expired = "expired"
 )

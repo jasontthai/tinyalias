@@ -12,7 +12,7 @@ const (
 	ParseGeoRequestJob = "ParseGeoRequestJob"
 	DetectSpamJob      = "DetectSpamJob"
 	ExpirationJob      = "ExpirationJob"
-	RemovePendingJob = "RemovePendingJob"
+	RemovePendingJob   = "RemovePendingJob"
 )
 
 type ParseGeoRequest struct {
