@@ -35,11 +35,11 @@ func init() {
 }
 
 const (
-	NotFoundQuery = "not-found"
-	ExpiredQuery  = "expired"
-	ThreatQuery   = "threat"
-	SlugQuery     = "slug"
-	BaseURL       = "baseUrl"
+	NotFoundQuery    = "not-found"
+	ExpiredQuery     = "expired"
+	ThreatQuery      = "threat"
+	SlugQuery        = "slug"
+	BaseURL          = "baseUrl"
 	XForwardedHeader = "X-Forwarded-For"
 )
 
@@ -103,7 +103,7 @@ func CreateURL(c *gin.Context) {
 		}
 	}
 
-	shortened, err := createURL(c, url, slug, password, expirationTime, mindful == "true")
+	shortened, err := createURL(c, url, slug, password, expirationTime, mindful == "true", false)
 	if err != nil {
 		c.Error(err)
 		c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
@@ -164,13 +164,13 @@ func Get(c *gin.Context) {
 			}).WithError(err).Error("error sending queue job")
 		}
 
-		if urlObj.Status == "expired" || (urlObj.Expired.Valid && urlObj.Expired.Time.Before(time.Now())) {
+		if urlObj.Status == models.Expired || (urlObj.Expired.Valid && urlObj.Expired.Time.Before(time.Now())) {
 			c.Redirect(http.StatusFound, fmt.Sprintf("?%v=%v", ExpiredQuery, slug))
 			return
 		}
 
 		// return spammed
-		if urlObj.Status != "active" {
+		if urlObj.Status != models.Active {
 			c.Redirect(http.StatusFound, fmt.Sprintf("?%v=%v&%v=%v", ThreatQuery, urlObj.Status, SlugQuery, slug))
 			return
 		}
@@ -229,7 +229,7 @@ func APICreateURL(c *gin.Context) {
 		expiration = time.Unix(i, 0)
 	}
 
-	shortened, err := createURL(c, url, slug, password, expiration, mindful == "true")
+	shortened, err := createURL(c, url, slug, password, expiration, mindful == "true", true)
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -255,8 +255,6 @@ func APICreateURL(c *gin.Context) {
 
 func APIGetURL(c *gin.Context) {
 	db := middleware.GetDB(c)
-	fmt.Println(c.Query("url"))
-	fmt.Println(tinyUrlRegexp.String())
 	submatches := tinyUrlRegexp.FindStringSubmatch(c.Query("url"))
 	if len(submatches) < 2 {
 		c.JSON(http.StatusOK, APIResponse{
@@ -288,7 +286,7 @@ func APIGetURL(c *gin.Context) {
 	}
 
 	// return spammed
-	if url.Status != "active" {
+	if url.Status != models.Active {
 		c.JSON(http.StatusOK, APIResponse{
 			Success: true,
 			Message: url.Status,
@@ -350,7 +348,7 @@ func APIGetURLs(c *gin.Context) {
 	})
 }
 
-func createURL(c *gin.Context, url, slug, password string, expiration time.Time, mindful bool) (string, error) {
+func createURL(c *gin.Context, url, slug, password string, expiration time.Time, mindful bool, isAPI bool) (string, error) {
 	db := middleware.GetDB(c)
 	_, qc := middleware.GetQue(c)
 
@@ -381,12 +379,18 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		ip = c.GetHeader(XForwardedHeader)
 	}
 
+	status := models.Active
+	if !isAPI {
+		status = models.Pending
+	}
+
 	urlObj = &models.URL{
 		Url:     url,
 		Slug:    slug,
 		Created: time.Now(),
 		IP:      ip,
 		Mindful: mindful,
+		Status:  status,
 	}
 
 	if password != "" {
@@ -436,7 +440,10 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		}
 		return true
 	}
-
+	if slug == "signal" {
+		HandleCopySignal(c)
+		handled = true
+	}
 	if slug == "create" {
 		APICreateURL(c)
 		handled = true
@@ -474,6 +481,49 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = true
 	}
 	return handled
+}
+
+func HandleCopySignal(c *gin.Context) {
+	url := c.Query("copied")
+	log.WithField("url", url).Info("Copied")
+
+	submatches := tinyUrlRegexp.FindStringSubmatch(url)
+	if len(submatches) < 2 {
+		log.WithField("url", url).Error("Unable to parse slug")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"success": false,
+		})
+		return
+	}
+	slug := submatches[1]
+
+	db := middleware.GetDB(c)
+	urlObj, err := pg.GetURL(db, "", slug)
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Set status to active
+	urlObj.Status = models.Active
+
+	err = pg.UpdateURL(db, urlObj)
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+	})
 }
 
 func GetNews(c *gin.Context) {
