@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	url2 "net/url"
 	"os"
 	"regexp"
 	"sort"
@@ -107,7 +108,7 @@ func CreateURL(c *gin.Context) {
 	if err != nil {
 		c.Error(err)
 		c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
-			"error":    "Oops. Something went wrong. Please try again.",
+			"error":    fmt.Errorf("Something went wrong: %v", err.Error()),
 			"original": url,
 			BaseURL:    baseUrl,
 		})
@@ -365,6 +366,21 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		url = "https://" + url
 	}
+
+	parseURL, err := url2.Parse(url)
+	if err != nil {
+		c.Error(err)
+	}
+	if parseURL != nil {
+		domain, err := pg.GetDomain(db, parseURL.Hostname())
+		if err != nil && err != sql.ErrNoRows {
+			c.Error(err)
+		}
+		if domain != nil && domain.Blacklist {
+			return "", fmt.Errorf("You are blacklisted.")
+		}
+	}
+
 	urlObj, err := pg.GetURL(db, url, slug)
 	if err != nil && err != sql.ErrNoRows {
 		return "", err
