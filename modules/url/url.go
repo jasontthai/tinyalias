@@ -372,7 +372,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		c.Error(err)
 	}
 	if parseURL != nil {
-		domain, err := pg.GetDomain(db, parseURL.Hostname())
+		domain, err := pg.GetDomain(db, strings.ToLower(parseURL.Hostname()))
 		if err != nil && err != sql.ErrNoRows {
 			c.Error(err)
 		}
