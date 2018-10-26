@@ -117,10 +117,7 @@
             console.log(e);
 
             $.ajax( {
-                url: '/signal?copied=' + copyBtn.getAttribute("data-clipboard-text"),
-                success: function(data) {
-                },
-                cache: false
+                url: '/signal?copied=' + copyBtn.getAttribute("data-clipboard-text")
             });
         });
         clipboard.on('error', function(e) {

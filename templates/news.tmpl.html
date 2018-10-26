@@ -89,10 +89,7 @@
                     $('#copied-' + index).html(' Copied!');
 
                     $.ajax( {
-                        url: '/signal?copied=' + data.short,
-                        success: function(data) {
-                        },
-                        cache: false
+                        url: '/signal?copied=' + data.short
                     });
                 });
                 clipboard.on('error', function(e) {
