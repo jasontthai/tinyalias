@@ -26,6 +26,7 @@
         </div>
     </div>
 </nav>
+
 <div class="container">
 {{ if .articles }}
 {{/*
@@ -44,7 +45,7 @@
                 <p class="card-text">Date: {{ .PublishedAt }}</p>
                 <p class="card-text">Source: {{ .Source.Name }}</p>
                 <p class="card-text"><a id="href-{{ $i }}" href=""></a><span id="copied-{{ $i }}"></span></p>
-                <button type="submit" id="submit-{{ $i }}" class="btn">Get Short Link</button>
+                <button type="submit" id="submit-{{ $i }}" class="btn btn-info">Get Short Link</button>
             </div>
         </div>
     </form>
@@ -89,10 +90,7 @@
                     $('#copied-' + index).html(' Copied!');
 
                     $.ajax( {
-                        url: '/signal?copied=' + data.short,
-                        success: function(data) {
-                        },
-                        cache: false
+                        url: '/signal?copied=' + data.short
                     });
                 });
                 clipboard.on('error', function(e) {

@@ -45,3 +45,11 @@ ALTER TABLE url_stats
 CREATE INDEX idx_url_stats_slug ON url_stats USING btree (slug);
 CREATE INDEX idx_url_stats_country ON url_stats USING btree (country);
 CREATE INDEX idx_url_stats_state ON url_stats USING btree (state);
+
+CREATE TABLE IF NOT EXISTS domains (
+  host text NOT NULL PRIMARY KEY,
+  blacklist boolean NOT NULL default false,
+  properties jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated timestamp without time zone
+);
