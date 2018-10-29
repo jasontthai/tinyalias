@@ -38,7 +38,9 @@
     document.getElementById("mindful").innerHTML = "This is a mindful link. Take a moment to breathe and be here and now. You will be directed in " + seconds_left + " seconds";
     $(document).ready(function () {
         setInterval(function () {
-            document.getElementById("mindful").innerHTML = "This is a mindful link. Take a moment to breathe and be here and now. You will be directed in " + --seconds_left +" seconds";
+            if (seconds_left >= 0) {
+                document.getElementById("mindful").innerHTML = "This is a mindful link. Take a moment to breathe and be here and now. You will be directed in " + --seconds_left +" seconds";
+            }
         },1000);
         window.setTimeout(function () {
             location.href = {{ .url }};
