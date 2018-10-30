@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+{{template "header.tmpl.html" . }}
+<body class="bg-dark">
+<nav class="navbar navbar-expand-sm navbar-dark py-5">
+    <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
+        <a class="navbar-brand mb-0 h1" href="/">TinyAlias</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/analytics">Analytics</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/links">Links</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/api">API</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/news">News (Experimental)</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container pt-5">
+    <h2>Links Created Today</h2>
+    <div class="table-responsive">
+        <table class="table" id="thetable">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">TinyAlias</th>
+                <th scope="col">Original</th>
+            </tr>
+            </thead>
+            <tbody id="thebody">
+            </tbody>
+        </table>
+        <ul id="pagination" class="pagination-sm justify-content-center"></ul>
+    </div>
+</div>
+</body>
+{{template "footer.tmpl.html" . }}
+<script>
+    var count = ({{ .count }})/20 + 1;
+    $('#pagination').twbsPagination({
+        totalPages:  count,
+        visiblePages: 5,
+        next: 'Next',
+        prev: 'Prev',
+        onPageClick: function (event, page) {
+            $.ajax( {
+                url: '{{ .APIUrl }}/?secret=asdzxc&offset=' + (page-1)*20,
+                success: function(data) {
+                    if (data.data == undefined) {
+                        return;
+                    }
+                    var trHTML = '';
+                    for (var i = 0; i < data.data.length; i++) {
+                        trHTML += '<tr>' +
+                                '<th scope="row">' + i + '</th>' +
+                                '<td><a href="' + {{ .baseUrl }} + data.data[i].slug +'">' + {{ .baseUrl }} + data.data[i].slug + '</a></td>' +
+                                '<td><a href="' + data.data[i].url +'">' + data.data[i].url +'</a></td>' +
+                                '</tr>';
+                    }
+                    console.log(trHTML);
+                    $('tbody#thebody').html(trHTML);
+                }
+            });
+        }
+    });
+</script>
+</html>

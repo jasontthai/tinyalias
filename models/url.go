@@ -22,7 +22,7 @@ type URL struct {
 	Created  time.Time `json:"created" db:"created"`
 	Updated  null.Time `json:"updated" db:"updated"`
 	Status   string    `json:"status" db:"status"`
-	Password string    `json:"password" db:"password"`
+	Password string    `json:"-" db:"password"`
 	Expired  null.Time `json:"expired" db:"expired"`
 	Mindful  bool      `json:"mindful" db:"mindful"`
 }

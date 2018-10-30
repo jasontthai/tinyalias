@@ -64,7 +64,9 @@
     </div>
 {{ end }}
     <span><a href="/">Create Another Link Here</a></span>
+
+{{template "footer.tmpl.html" . }}
+{{template "links.tmpl.html" . }}
 </div>
 </body>
-{{template "footer.tmpl.html" . }}
 </html>

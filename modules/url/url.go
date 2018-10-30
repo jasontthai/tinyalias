@@ -2,6 +2,7 @@ package url
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	url2 "net/url"
@@ -24,11 +25,13 @@ import (
 )
 
 var baseUrl string
+var baseAPIUrl string
 var secret string
 var tinyUrlRegexp *regexp.Regexp
 
 func init() {
 	baseUrl = os.Getenv("BASE_URL")
+	baseAPIUrl = os.Getenv("API_BASE_URL")
 
 	// secret in order to use API GET route
 	secret = os.Getenv("SECRET")
@@ -41,7 +44,10 @@ const (
 	ThreatQuery      = "threat"
 	SlugQuery        = "slug"
 	BaseURL          = "baseUrl"
+	BaseAPIURL       = "APIUrl"
 	XForwardedHeader = "X-Forwarded-For"
+	DefaultLimit     = 20
+	DefaultOffset    = 0
 )
 
 type APIResponse struct {
@@ -325,17 +331,21 @@ func APIGetURL(c *gin.Context) {
 }
 
 func APIGetURLs(c *gin.Context) {
-	secretQuery := c.Query("secret")
-	if secret != secretQuery {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+	db := middleware.GetDB(c)
+
+	limit, offset, err := GetLimitAndOffsetQueries(c)
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"success": false,
+			"error":   err.Error(),
 		})
 		return
 	}
 
-	db := middleware.GetDB(c)
-
 	clauses := make(map[string]interface{})
+	clauses["_limit"] = limit
+	clauses["_offset"] = offset
 	urls, err := pg.GetURLs(db, clauses)
 	if err != nil {
 		c.Error(err)
@@ -479,18 +489,30 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		c.HTML(http.StatusOK, "privacypolicy.tmpl.html", gin.H{})
 		handled = true
 	}
-
 	if slug == "api" {
 		c.HTML(http.StatusOK, "api.tmpl.html", gin.H{
 			BaseURL: baseUrl,
 		})
 		handled = true
 	}
-
 	if slug == "news" {
 		GetNews(c)
 		handled = true
 	}
+	if slug == "links" {
+		db := middleware.GetDB(c)
+		count, err := pg.GetURLWithoutPasswordCount(db)
+		if err != nil {
+			c.Error(err)
+		}
+		c.HTML(http.StatusOK, "links.tmpl.html", gin.H{
+			BaseURL:    baseUrl,
+			BaseAPIURL: baseAPIUrl,
+			"count":    count,
+		})
+		handled = true
+	}
+
 	return handled
 }
 
@@ -571,7 +593,7 @@ func GetAnalytics(c *gin.Context) {
 	})
 	if err != nil {
 		c.Error(err)
-		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
+		c.HTML(http.StatusInternalServerError, "analytics.tmpl.html", gin.H{
 			"error": "Invalid URL. Try again.",
 			BaseURL: baseUrl,
 		})
@@ -599,11 +621,49 @@ func GetAnalytics(c *gin.Context) {
 		"analytics": analytics,
 	}).Info("Returned values")
 
+	urls, err := pg.GetURLs(db, map[string]interface{}{})
+	if err != nil {
+		c.Error(err)
+		c.HTML(http.StatusInternalServerError, "analytics.tmpl.html", gin.H{
+			"error": "Invalid URL. Try again.",
+			BaseURL: baseUrl,
+		})
+		return
+	}
+	log.Info(urls)
+
 	c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
 		"url":       c.Query("url"),
 		"count":     counter,
 		"analytics": analytics,
 		BaseURL:     baseUrl,
+		"urls":      urls,
 	})
 	return
+}
+
+func GetLimitAndOffsetQueries(c *gin.Context) (limit, offset uint64, err error) {
+	offsetStr := c.Query("offset")
+	if offsetStr != "" {
+		offset, err = strconv.ParseUint(offsetStr, 10, 32)
+		if err != nil {
+			return 0, 0, err
+		}
+	} else {
+		offset = DefaultOffset
+	}
+
+	limitStr := c.Query("limit")
+	if limitStr != "" {
+		limit, err = strconv.ParseUint(limitStr, 10, 32)
+		if err != nil {
+			return 0, 0, err
+		}
+	} else {
+		limit = DefaultLimit
+	}
+	if limit > 100 {
+		return 0, 0, errors.New("limit must be <= 100")
+	}
+	return limit, offset, err
 }

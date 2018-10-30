@@ -44,7 +44,8 @@ func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	sb := psql.Select("*").
-		From("urls").OrderBy("created desc")
+		From("urls").OrderBy("created desc").
+		Where(squirrel.Eq{"password": ""})
 
 	if slug, ok := clauses["slug"].(string); ok {
 		sb = sb.Where(squirrel.Eq{"slug": slug})
@@ -52,10 +53,6 @@ func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) 
 
 	if url, ok := clauses["url"].(string); ok {
 		sb = sb.Where(squirrel.Eq{"url": url})
-	}
-
-	if status, ok := clauses["status"].(string); ok {
-		sb = sb.Where(squirrel.Eq{"status": status})
 	}
 
 	if status, ok := clauses["status"].(string); ok {
@@ -91,6 +88,24 @@ func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) 
 		urls = append(urls, url)
 	}
 	return urls, nil
+}
+
+func GetURLWithoutPasswordCount(db *sqlx.DB) (int, error) {
+	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+	sb := psql.Select("count(*)").
+		From("urls").Where(squirrel.Eq{"password": ""})
+
+	sqlStr, args, err := sb.ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	var count int
+	err = db.Get(&count, sqlStr, args...)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func CreateURL(db *sqlx.DB, url *models.URL) error {
