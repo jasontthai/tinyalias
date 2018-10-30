@@ -13,7 +13,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
                 </li>
-                <li class="nav-item active">
+                <li class="nav-item">
                     <a class="nav-link" href="/analytics">Analytics</a>
                 </li>
                 <li class="nav-item active">
@@ -31,12 +31,13 @@
 </nav>
 
 <div class="container pt-5">
-    <h2>Links Created Today</h2>
+    <h2 data-toggle="tooltip" data-placement="left" data-original-title="Links with password are not returned">Links Created*</h2>
     <div class="table-responsive">
         <table class="table" id="thetable">
             <thead>
             <tr>
                 <th scope="col">#</th>
+                <th scope="col">Clicks</th>
                 <th scope="col">TinyAlias</th>
                 <th scope="col">Original</th>
             </tr>
@@ -50,7 +51,11 @@
 </body>
 {{template "footer.tmpl.html" . }}
 <script>
-    var count = ({{ .count }})/20 + 1;
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+
+    var count = ({{ .count }})/20 + 2;
     $('#pagination').twbsPagination({
         totalPages:  count,
         visiblePages: 5,
@@ -58,7 +63,7 @@
         prev: 'Prev',
         onPageClick: function (event, page) {
             $.ajax( {
-                url: '{{ .APIUrl }}/?secret=asdzxc&offset=' + (page-1)*20,
+                url: '{{ .APIUrl }}/?offset=' + (page-1)*20,
                 success: function(data) {
                     if (data.data == undefined) {
                         return;
@@ -66,7 +71,8 @@
                     var trHTML = '';
                     for (var i = 0; i < data.data.length; i++) {
                         trHTML += '<tr>' +
-                                '<th scope="row">' + i + '</th>' +
+                                '<th scope="row">' + (i+1) + '</th>' +
+                                '<td>' + data.data[i].counter + '</td>' +
                                 '<td><a href="' + {{ .baseUrl }} + data.data[i].slug +'">' + {{ .baseUrl }} + data.data[i].slug + '</a></td>' +
                                 '<td><a href="' + data.data[i].url +'">' + data.data[i].url +'</a></td>' +
                                 '</tr>';
