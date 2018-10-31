@@ -129,6 +129,7 @@ func Register(c *gin.Context) {
 
 	err = pg.CreateUser(db, &models.User{
 		Username: username,
+		Role:     models.RoleUser,
 		Password: hashedPassword,
 		Created:  time.Now(),
 	})

@@ -2,6 +2,7 @@ package pg
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -154,6 +155,28 @@ func UpdateURL(db *sqlx.DB, url *models.URL) error {
 		return err
 	}
 
+	if _, err = db.Exec(sqlStr, args...); err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteURL(db *sqlx.DB, longUrl, slug string) error {
+	if longUrl == "" && slug == "" {
+		return fmt.Errorf("missing required field")
+	}
+	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+	sb := psql.Delete("urls")
+	if longUrl != "" {
+		sb = sb.Where(squirrel.Eq{"url": longUrl})
+	}
+	if slug != "" {
+		sb = sb.Where(squirrel.Eq{"slug": slug})
+	}
+	sqlStr, args, err := sb.ToSql()
+	if err != nil {
+		return err
+	}
 	if _, err = db.Exec(sqlStr, args...); err != nil {
 		return err
 	}

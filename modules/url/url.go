@@ -466,6 +466,8 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		APICreateURL(c)
 	case "get":
 		HandleGetLinks(c)
+	case "del":
+		HandleDeleteLinks(c)
 	case "shorten":
 		CreateURL(c)
 	case "favicon.ico":
@@ -488,6 +490,55 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = false
 	}
 	return handled
+}
+
+func HandleDeleteLinks(c *gin.Context) {
+	db := middleware.GetDB(c)
+	slug := c.Query("alias")
+	urlStr := c.Query("url")
+
+	user := auth.GetAuthenticatedUser(c)
+	if user == nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+		})
+		return
+	}
+
+	url, err := pg.GetURL(db, urlStr, slug)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.AbortWithStatusJSON(http.StatusOK, gin.H{
+				"success": true,
+			})
+			return
+		}
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err,
+		})
+		return
+	}
+
+	if user.Role != models.RoleAdmin && url.Username != user.Username {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+		})
+		return
+	}
+
+	err = pg.DeleteURL(db, urlStr, slug)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+	})
 }
 
 func HandleGetLinks(c *gin.Context) {
@@ -513,7 +564,11 @@ func HandleGetLinks(c *gin.Context) {
 	clauses := make(map[string]interface{})
 	clauses["_limit"] = limit
 	clauses["_offset"] = offset
-	clauses["username"] = user.Username
+
+	// allow admin to query for all urls
+	if user.Role != models.RoleAdmin {
+		clauses["username"] = user.Username
+	}
 	urls, err := pg.GetURLs(db, clauses)
 	if err != nil {
 		c.Error(err)
@@ -597,7 +652,11 @@ func GetAnalytics(c *gin.Context) {
 	var err error
 	if user != nil {
 		clauses := make(map[string]interface{})
-		clauses["username"] = user.Username
+
+		// Allow admins to query for all urls
+		if user.Role != models.RoleAdmin {
+			clauses["username"] = user.Username
+		}
 
 		count, err = pg.GetURLCount(db, clauses)
 		if err != nil {

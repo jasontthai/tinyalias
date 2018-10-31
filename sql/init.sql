@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS domains (
 
 CREATE TABLE IF NOT EXISTS users (
   username text NOT NULL PRIMARY KEY,
+  role text NOT NULL DEFAULT 'user',
   password text NOT NULL,
   status text NOT NULL DEFAULT 'active',
   properties jsonb NOT NULL DEFAULT '{}'::jsonb,

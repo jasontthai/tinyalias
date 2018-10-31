@@ -75,6 +75,7 @@
                 <th scope="col">Clicks</th>
                 <th scope="col">TinyAlias</th>
                 <th scope="col">Original</th>
+                <th scope="col">Manage</th>
             </tr>
             </thead>
             <tbody id="thebody">
@@ -92,8 +93,9 @@
     });
 
     var limit = 10;
-    var count = ({{ .count }})/limit + 1;
-    $('#pagination').twbsPagination({
+    var count = ({{ .count }})/limit + 2;
+    var $pagination = $('#pagination');
+    $pagination.twbsPagination({
         totalPages:  count,
         visiblePages: 5,
         next: 'Next',
@@ -108,18 +110,27 @@
                     var trHTML = '';
                     for (var i = 0; i < data.data.length; i++) {
                         var idx = (page-1)*limit + i + 1;
-                        trHTML += '<tr>' +
+                        trHTML += '<tr id="therow-' + idx + '">' +
                                 '<th scope="row">' + idx + '</th>' +
                                 '<td>' + data.data[i].counter + '</td>' +
                                 '<td><a href="' + {{ .baseUrl }} + data.data[i].slug +'">' + {{ .baseUrl }} + data.data[i].slug + '</a></td>' +
                                 '<td><a href="' + data.data[i].url +'">' + data.data[i].url +'</a></td>' +
+                                '<td><a data-toggle="tooltip" data-placement="top" data-original-title="Delete" href="#/" onClick="del(\'' + idx +'\',\'' + data.data[i].slug + '\',\'' + data.data[i].url + '\');"><i class="fa fa-times" aria-hidden="true"></i></a></td>' +
                                 '</tr>';
                     }
-                    console.log(trHTML);
                     $('tbody#thebody').html(trHTML);
                 }
             });
         }
     });
+
+    function del(idx, slug, url) {
+        $.ajax({
+            url: '/del?slug=' + slug + '&url=' + url,
+            success: function (data) {
+                $('#therow-'+idx).remove();
+            }
+        })
+    };
 </script>
 </html>

@@ -32,8 +32,8 @@ func GetUser(db *sqlx.DB, username string) (*models.User, error) {
 
 func CreateUser(db *sqlx.DB, user *models.User) error {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Insert("users").Columns("username, password, properties, created, updated").
-		Values(user.Username, user.Password, user.Properties, user.Created, user.Updated)
+	sb := psql.Insert("users").Columns("username, role, password, properties, created, updated").
+		Values(user.Username, user.Role, user.Password, user.Properties, user.Created, user.Updated)
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
 		return err
