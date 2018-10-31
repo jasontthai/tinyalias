@@ -621,23 +621,11 @@ func GetAnalytics(c *gin.Context) {
 		"analytics": analytics,
 	}).Info("Returned values")
 
-	urls, err := pg.GetURLs(db, map[string]interface{}{})
-	if err != nil {
-		c.Error(err)
-		c.HTML(http.StatusInternalServerError, "analytics.tmpl.html", gin.H{
-			"error": "Invalid URL. Try again.",
-			BaseURL: baseUrl,
-		})
-		return
-	}
-	log.Info(urls)
-
 	c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
 		"url":       c.Query("url"),
 		"count":     counter,
 		"analytics": analytics,
 		BaseURL:     baseUrl,
-		"urls":      urls,
 	})
 	return
 }
