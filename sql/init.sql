@@ -53,3 +53,12 @@ CREATE TABLE IF NOT EXISTS domains (
   created timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated timestamp without time zone
 );
+
+CREATE TABLE IF NOT EXISTS users (
+  username text NOT NULL PRIMARY KEY,
+  password text NOT NULL,
+  status text NOT NULL DEFAULT 'active',
+  properties jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated timestamp without time zone
+);

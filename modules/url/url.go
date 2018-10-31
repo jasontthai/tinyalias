@@ -17,6 +17,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/zirius/tinyalias/middleware"
 	"github.com/zirius/tinyalias/models"
+	"github.com/zirius/tinyalias/modules/auth"
 	"github.com/zirius/tinyalias/modules/newsapi"
 	"github.com/zirius/tinyalias/modules/queue"
 	"github.com/zirius/tinyalias/modules/utils"
@@ -76,7 +77,7 @@ func GetHomePage(c *gin.Context) {
 		error = "The link you entered has expired. Fancy creating one?"
 	}
 
-	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+	utils.HandleHtmlResponse(c, http.StatusOK, "main.tmpl.html", gin.H{
 		BaseURL: baseUrl,
 		"error": error,
 	})
@@ -96,7 +97,7 @@ func CreateURL(c *gin.Context) {
 		expirationTime, err = time.Parse("01/02/2006 3:04 PM", expiration)
 		if err != nil {
 			c.Error(err)
-			c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
+			utils.HandleHtmlResponse(c, http.StatusInternalServerError, "main.tmpl.html", gin.H{
 				"error": "Oops. Something went wrong. Please try again.",
 				BaseURL: baseUrl,
 			})
@@ -107,7 +108,7 @@ func CreateURL(c *gin.Context) {
 	shortened, err := createURL(c, url, slug, password, expirationTime, mindful == "true")
 	if err != nil {
 		c.Error(err)
-		c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
+		utils.HandleHtmlResponse(c, http.StatusInternalServerError, "main.tmpl.html", gin.H{
 			"error":    fmt.Errorf("Something went wrong: %v", err.Error()),
 			"original": url,
 			BaseURL:    baseUrl,
@@ -115,7 +116,7 @@ func CreateURL(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+	utils.HandleHtmlResponse(c, http.StatusOK, "main.tmpl.html", gin.H{
 		"url":      shortened,
 		"original": url,
 		BaseURL:    baseUrl,
@@ -182,14 +183,14 @@ func Get(c *gin.Context) {
 			if c.Query("password") != "" {
 				err = models.VerifyPassword(urlObj.Password, c.Query("password"))
 				if err != nil {
-					c.HTML(http.StatusOK, "password.tmpl.html", gin.H{
+					utils.HandleHtmlResponse(c, http.StatusOK, "password.tmpl.html", gin.H{
 						"baseUrl": baseUrl,
 						"error":   "Wrong Password. Try Again.",
 					})
 					return
 				}
 			} else {
-				c.HTML(http.StatusOK, "password.tmpl.html", gin.H{
+				utils.HandleHtmlResponse(c, http.StatusOK, "password.tmpl.html", gin.H{
 					"baseUrl": baseUrl,
 				})
 				return
@@ -197,7 +198,7 @@ func Get(c *gin.Context) {
 		}
 
 		if urlObj.Mindful {
-			c.HTML(http.StatusOK, "mindful.tmpl.html", gin.H{
+			utils.HandleHtmlResponse(c, http.StatusOK, "mindful.tmpl.html", gin.H{
 				"baseUrl": baseUrl,
 				"url":     urlObj.Url,
 			})
@@ -481,7 +482,7 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	}
 
 	if slug == "api" {
-		c.HTML(http.StatusOK, "api.tmpl.html", gin.H{
+		utils.HandleHtmlResponse(c, http.StatusOK, "api.tmpl.html", gin.H{
 			BaseURL: baseUrl,
 		})
 		handled = true
@@ -489,6 +490,16 @@ func handleSpecialRoutes(c *gin.Context) bool {
 
 	if slug == "news" {
 		GetNews(c)
+		handled = true
+	}
+	if slug == "auth" {
+		utils.HandleHtmlResponse(c, http.StatusOK, "auth.tmpl.html", gin.H{
+			BaseURL: baseUrl,
+		})
+		handled = true
+	}
+	if slug == "logout" {
+		auth.Logout(c)
 		handled = true
 	}
 	return handled
@@ -542,12 +553,12 @@ func GetNews(c *gin.Context) {
 	articles, err := client.GetTopHeadlines()
 	if err != nil {
 		c.Error(err)
-		c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
+		utils.HandleHtmlResponse(c, http.StatusOK, "news.tmpl.html", gin.H{
 			"error": err.Error(),
 			BaseURL: baseUrl,
 		})
 	} else {
-		c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
+		utils.HandleHtmlResponse(c, http.StatusOK, "news.tmpl.html", gin.H{
 			"articles": articles,
 			BaseURL:    baseUrl,
 		})
@@ -559,7 +570,7 @@ func GetAnalytics(c *gin.Context) {
 
 	submatches := tinyUrlRegexp.FindStringSubmatch(c.Query("url"))
 	if len(submatches) < 2 {
-		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
+		utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{
 			BaseURL: baseUrl,
 		})
 		return
@@ -571,7 +582,7 @@ func GetAnalytics(c *gin.Context) {
 	})
 	if err != nil {
 		c.Error(err)
-		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
+		utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{
 			"error": "Invalid URL. Try again.",
 			BaseURL: baseUrl,
 		})
@@ -599,7 +610,7 @@ func GetAnalytics(c *gin.Context) {
 		"analytics": analytics,
 	}).Info("Returned values")
 
-	c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
+	utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{
 		"url":       c.Query("url"),
 		"count":     counter,
 		"analytics": analytics,
