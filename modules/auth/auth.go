@@ -8,11 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/zirius/tinyalias/middleware"
 	"github.com/zirius/tinyalias/models"
+	"github.com/zirius/tinyalias/modules/utils"
 	"github.com/zirius/tinyalias/pg"
-)
-
-const (
-	SessionName = "My-Session"
 )
 
 func Login(c *gin.Context) {
@@ -44,7 +41,7 @@ func Login(c *gin.Context) {
 	}
 
 	sessionStore := middleware.GetSessionStore(c)
-	session, err := sessionStore.Get(c.Request, SessionName)
+	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)
 		c.HTML(http.StatusInternalServerError, "auth.tmpl.html", gin.H{
@@ -68,7 +65,7 @@ func Login(c *gin.Context) {
 func Logout(c *gin.Context) {
 	sessionStore := middleware.GetSessionStore(c)
 
-	session, err := sessionStore.Get(c.Request, SessionName)
+	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)
 		c.Redirect(http.StatusFound, "/")
@@ -137,7 +134,7 @@ func Register(c *gin.Context) {
 	}
 
 	sessionStore := middleware.GetSessionStore(c)
-	session, err := sessionStore.Get(c.Request, SessionName)
+	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -162,7 +159,7 @@ func Register(c *gin.Context) {
 func UpdatePassword(c *gin.Context) {
 	sessionStore := middleware.GetSessionStore(c)
 
-	session, err := sessionStore.Get(c.Request, SessionName)
+	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)
 	}

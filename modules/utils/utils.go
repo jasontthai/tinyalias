@@ -7,13 +7,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/zirius/tinyalias/middleware"
-	"github.com/zirius/tinyalias/modules/auth"
 )
 
 const (
-	base       = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
-	BaseURL    = "baseUrl"
-	ApiBaseURL = "APIUrl"
+	base        = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+	BaseURL     = "baseUrl"
+	ApiBaseURL  = "APIUrl"
+	SessionName = "My-Session"
 )
 
 var BaseUrl string
@@ -38,7 +38,7 @@ func GenerateSlug(size int) string {
 func HandleHtmlResponse(c *gin.Context, statusCode int, template string, h gin.H) {
 	sessionStore := middleware.GetSessionStore(c)
 
-	session, err := sessionStore.Get(c.Request, auth.SessionName)
+	session, err := sessionStore.Get(c.Request, SessionName)
 	if err != nil {
 		c.Error(err)
 	}

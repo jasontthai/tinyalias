@@ -32,6 +32,7 @@ func GetTestSessionKeys() (authKey, encryptKey string) {
 	if encryptKey == "" {
 		encryptKey = "WlFbVowe"
 	}
+	return
 }
 
 func GetTestRouter() *gin.Engine {

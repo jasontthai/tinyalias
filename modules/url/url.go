@@ -421,7 +421,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 
 	sessionStore := middleware.GetSessionStore(c)
 
-	session, err := sessionStore.Get(c.Request, auth.SessionName)
+	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)
 	}
@@ -525,7 +525,7 @@ func GetLinks(c *gin.Context) {
 	db := middleware.GetDB(c)
 	sessionStore := middleware.GetSessionStore(c)
 
-	session, err := sessionStore.Get(c.Request, auth.SessionName)
+	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)
 	}
@@ -555,7 +555,7 @@ func HandleGetLinks(c *gin.Context) {
 
 	sessionStore := middleware.GetSessionStore(c)
 
-	session, err := sessionStore.Get(c.Request, auth.SessionName)
+	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)
 	}
