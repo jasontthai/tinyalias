@@ -93,7 +93,10 @@
     });
 
     var limit = 10;
-    var count = ({{ .count }})/limit + 2;
+    var count = ({{ .count }})/limit + 1;
+    if (count < 2) {
+        count = 2;
+    }
     var $pagination = $('#pagination');
     $pagination.twbsPagination({
         totalPages:  count,
