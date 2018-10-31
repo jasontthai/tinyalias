@@ -447,7 +447,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 
 func handleSpecialRoutes(c *gin.Context) bool {
 	slug := c.Param("slug")
-	var handled bool
+	var handled bool = true
 
 	if strings.Contains(c.Request.Host, "api") {
 		if slug == "create" {
@@ -459,53 +459,33 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		}
 		return true
 	}
-	if slug == "signal" {
+	switch slug {
+	case "signal":
 		HandleCopySignal(c)
-		handled = true
-	}
-	if slug == "create" {
+	case "create":
 		APICreateURL(c)
-		handled = true
-	}
-	if slug == "get" {
+	case "get":
 		HandleGetLinks(c)
-		handled = true
-	}
-	if slug == "shorten" {
+	case "shorten":
 		CreateURL(c)
-		handled = true
-	}
-	if slug == "favicon.ico" {
+	case "favicon.ico":
 		c.File("./static/favicon.ico")
-		handled = true
-	}
-	if slug == "robots.txt" {
+	case "robots.txt":
 		c.File("./static/robots.txt")
-		handled = true
-	}
-	if slug == "analytics" {
+	case "analytics":
 		GetAnalytics(c)
-		handled = true
-	}
-	if slug == "privacy-policy" {
+	case "privacy-policy":
 		c.HTML(http.StatusOK, "privacypolicy.tmpl.html", gin.H{})
-		handled = true
-	}
-	if slug == "api" {
+	case "api":
 		utils.HandleHtmlResponse(c, http.StatusOK, "api.tmpl.html", gin.H{})
-		handled = true
-	}
-	if slug == "news" {
+	case "news":
 		GetNews(c)
-		handled = true
-	}
-	if slug == "auth" {
+	case "auth":
 		utils.HandleHtmlResponse(c, http.StatusOK, "auth.tmpl.html", gin.H{})
-		handled = true
-	}
-	if slug == "logout" {
+	case "logout":
 		auth.Logout(c)
-		handled = true
+	default:
+		handled = false
 	}
 	return handled
 }
