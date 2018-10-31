@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -10,9 +11,15 @@ import (
 )
 
 const (
-	base = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+	base    = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+	BaseURL = "baseUrl"
 )
 
+var BaseUrl string
+
+func init() {
+	BaseUrl = os.Getenv("BASE_URL")
+}
 func GenerateSlug(size int) string {
 	s := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(s)
@@ -37,5 +44,6 @@ func HandleHtmlResponse(c *gin.Context, statusCode int, template string, h gin.H
 	if found {
 		h["user"] = username
 	}
+	h[BaseURL] = BaseUrl
 	c.HTML(statusCode, template, h)
 }

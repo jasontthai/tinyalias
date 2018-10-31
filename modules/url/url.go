@@ -24,12 +24,10 @@ import (
 	"github.com/zirius/tinyalias/pg"
 )
 
-var baseUrl string
 var secret string
 var tinyUrlRegexp *regexp.Regexp
 
 func init() {
-	baseUrl = os.Getenv("BASE_URL")
 
 	// secret in order to use API GET route
 	secret = os.Getenv("SECRET")
@@ -41,7 +39,6 @@ const (
 	ExpiredQuery     = "expired"
 	ThreatQuery      = "threat"
 	SlugQuery        = "slug"
-	BaseURL          = "baseUrl"
 	XForwardedHeader = "X-Forwarded-For"
 )
 
@@ -78,7 +75,6 @@ func GetHomePage(c *gin.Context) {
 	}
 
 	utils.HandleHtmlResponse(c, http.StatusOK, "main.tmpl.html", gin.H{
-		BaseURL: baseUrl,
 		"error": error,
 	})
 }
@@ -99,7 +95,6 @@ func CreateURL(c *gin.Context) {
 			c.Error(err)
 			utils.HandleHtmlResponse(c, http.StatusInternalServerError, "main.tmpl.html", gin.H{
 				"error": "Oops. Something went wrong. Please try again.",
-				BaseURL: baseUrl,
 			})
 			return
 		}
@@ -111,7 +106,6 @@ func CreateURL(c *gin.Context) {
 		utils.HandleHtmlResponse(c, http.StatusInternalServerError, "main.tmpl.html", gin.H{
 			"error":    fmt.Errorf("Something went wrong: %v", err.Error()),
 			"original": url,
-			BaseURL:    baseUrl,
 		})
 		return
 	}
@@ -119,7 +113,6 @@ func CreateURL(c *gin.Context) {
 	utils.HandleHtmlResponse(c, http.StatusOK, "main.tmpl.html", gin.H{
 		"url":      shortened,
 		"original": url,
-		BaseURL:    baseUrl,
 	})
 }
 
@@ -184,23 +177,19 @@ func Get(c *gin.Context) {
 				err = models.VerifyPassword(urlObj.Password, c.Query("password"))
 				if err != nil {
 					utils.HandleHtmlResponse(c, http.StatusOK, "password.tmpl.html", gin.H{
-						"baseUrl": baseUrl,
-						"error":   "Wrong Password. Try Again.",
+						"error": "Wrong Password. Try Again.",
 					})
 					return
 				}
 			} else {
-				utils.HandleHtmlResponse(c, http.StatusOK, "password.tmpl.html", gin.H{
-					"baseUrl": baseUrl,
-				})
+				utils.HandleHtmlResponse(c, http.StatusOK, "password.tmpl.html", gin.H{})
 				return
 			}
 		}
 
 		if urlObj.Mindful {
 			utils.HandleHtmlResponse(c, http.StatusOK, "mindful.tmpl.html", gin.H{
-				"baseUrl": baseUrl,
-				"url":     urlObj.Url,
+				"url": urlObj.Url,
 			})
 			return
 		}
@@ -387,7 +376,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		return "", err
 	}
 	if urlObj != nil {
-		return baseUrl + urlObj.Slug, nil
+		return utils.BaseUrl + urlObj.Slug, nil
 	}
 
 	if slug == "" {
@@ -422,7 +411,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 	if err != nil {
 		return "", err
 	}
-	shortened = baseUrl + urlObj.Slug
+	shortened = utils.BaseUrl + urlObj.Slug
 
 	// Dispatch ParseGeoRequestJob
 	if err := queue.DispatchDetectSpamJob(qc, url); err != nil {
@@ -482,9 +471,7 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	}
 
 	if slug == "api" {
-		utils.HandleHtmlResponse(c, http.StatusOK, "api.tmpl.html", gin.H{
-			BaseURL: baseUrl,
-		})
+		utils.HandleHtmlResponse(c, http.StatusOK, "api.tmpl.html", gin.H{})
 		handled = true
 	}
 
@@ -493,9 +480,7 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = true
 	}
 	if slug == "auth" {
-		utils.HandleHtmlResponse(c, http.StatusOK, "auth.tmpl.html", gin.H{
-			BaseURL: baseUrl,
-		})
+		utils.HandleHtmlResponse(c, http.StatusOK, "auth.tmpl.html", gin.H{})
 		handled = true
 	}
 	if slug == "logout" {
@@ -555,12 +540,10 @@ func GetNews(c *gin.Context) {
 		c.Error(err)
 		utils.HandleHtmlResponse(c, http.StatusOK, "news.tmpl.html", gin.H{
 			"error": err.Error(),
-			BaseURL: baseUrl,
 		})
 	} else {
 		utils.HandleHtmlResponse(c, http.StatusOK, "news.tmpl.html", gin.H{
 			"articles": articles,
-			BaseURL:    baseUrl,
 		})
 	}
 }
@@ -570,9 +553,7 @@ func GetAnalytics(c *gin.Context) {
 
 	submatches := tinyUrlRegexp.FindStringSubmatch(c.Query("url"))
 	if len(submatches) < 2 {
-		utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{
-			BaseURL: baseUrl,
-		})
+		utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{})
 		return
 	}
 	slug := submatches[1]
@@ -584,7 +565,6 @@ func GetAnalytics(c *gin.Context) {
 		c.Error(err)
 		utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{
 			"error": "Invalid URL. Try again.",
-			BaseURL: baseUrl,
 		})
 		return
 	}
@@ -614,7 +594,6 @@ func GetAnalytics(c *gin.Context) {
 		"url":       c.Query("url"),
 		"count":     counter,
 		"analytics": analytics,
-		BaseURL:     baseUrl,
 	})
 	return
 }
