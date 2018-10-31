@@ -57,7 +57,7 @@ jobs:
       - checkout
       - run: ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
       - run: git remote add dokku dokku@$SERVER_IP:tinyalias
-      - run: git push dokku $CIRCLE_BRANCH
+      - run: git push -f dokku $CIRCLE_BRANCH
 
 workflows:
   version: 2
