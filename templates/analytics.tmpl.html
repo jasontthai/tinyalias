@@ -42,7 +42,7 @@
     </form>
 {{ if .url }}
     <h2 class="text-center">Stats for {{ .url }}</h2>
-    <h3>Number of clicks: {{ .count }}</h3>
+    <h3>Number of clicks: {{ .clicks }}</h3>
 {{ end }}
 {{ if .analytics }}
     <h3>Visits by Countries</h3>
@@ -64,7 +64,60 @@
     </div>
 {{ end }}
     <span><a href="/">Create Another Link Here</a></span>
+
+{{ if .user }}
+    <h2  class="pt-5">Links You Created</h2>
+    <div class="table-responsive">
+        <table class="table" id="thetable">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Clicks</th>
+                <th scope="col">TinyAlias</th>
+                <th scope="col">Original</th>
+            </tr>
+            </thead>
+            <tbody id="thebody">
+            </tbody>
+        </table>
+        <ul id="pagination" class="pagination-sm justify-content-center"></ul>
+    </div>
+{{ end }}
 </div>
 </body>
 {{template "footer.tmpl.html" . }}
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+
+    var count = ({{ .count }})/20 + 2;
+    $('#pagination').twbsPagination({
+        totalPages:  count,
+        visiblePages: 5,
+        next: 'Next',
+        prev: 'Prev',
+        onPageClick: function (event, page) {
+            $.ajax( {
+                url: '/get?offset=' + (page-1)*20,
+                success: function(data) {
+                    if (data.data == undefined) {
+                        return;
+                    }
+                    var trHTML = '';
+                    for (var i = 0; i < data.data.length; i++) {
+                        trHTML += '<tr>' +
+                                '<th scope="row">' + (i+1) + '</th>' +
+                                '<td>' + data.data[i].counter + '</td>' +
+                                '<td><a href="' + {{ .baseUrl }} + data.data[i].slug +'">' + {{ .baseUrl }} + data.data[i].slug + '</a></td>' +
+                                '<td><a href="' + data.data[i].url +'">' + data.data[i].url +'</a></td>' +
+                                '</tr>';
+                    }
+                    console.log(trHTML);
+                    $('tbody#thebody').html(trHTML);
+                }
+            });
+        }
+    });
+</script>
 </html>

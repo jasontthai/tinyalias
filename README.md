@@ -18,6 +18,8 @@ This installation guide assume you have already have installed postgres and hero
   * `APP_NAME` : app name e.g. `test-tinyalias`
   * `BASE_URL` : for local run use `localhost:5000/`
   * `GOOGLE_API_KEY` : used for Google safebrowsing API
+  * `SESSION_AUTHENTICATION_KEY` : used to auth cookie field
+  * `SESSION_ENCRYPTION_KEY` : used to encrypt cookie field
 
 # Local Run
 

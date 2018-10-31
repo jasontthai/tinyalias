@@ -2,13 +2,27 @@ package utils
 
 import (
 	"math/rand"
+	"os"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/zirius/tinyalias/middleware"
 )
 
 const (
-	base = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+	base        = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+	BaseURL     = "baseUrl"
+	ApiBaseURL  = "APIUrl"
+	SessionName = "My-Session"
 )
 
+var BaseUrl string
+var ApiBaseUrl string
+
+func init() {
+	BaseUrl = os.Getenv("BASE_URL")
+	ApiBaseUrl = os.Getenv("API_BASE_URL")
+}
 func GenerateSlug(size int) string {
 	s := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(s)
@@ -19,4 +33,20 @@ func GenerateSlug(size int) string {
 		slug = slug + string(base[idx])
 	}
 	return slug
+}
+
+func HandleHtmlResponse(c *gin.Context, statusCode int, template string, h gin.H) {
+	sessionStore := middleware.GetSessionStore(c)
+	session, err := sessionStore.Get(c.Request, SessionName)
+	if err != nil {
+		c.Error(err)
+	}
+
+	username, found := session.Values["username"]
+	if found && username != "" {
+		h["user"] = username
+	}
+	h[BaseURL] = BaseUrl
+	h[ApiBaseURL] = ApiBaseUrl
+	c.HTML(statusCode, template, h)
 }
