@@ -506,10 +506,6 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		GetNews(c)
 		handled = true
 	}
-	if slug == "links" {
-		GetLinks(c)
-		handled = true
-	}
 	if slug == "auth" {
 		utils.HandleHtmlResponse(c, http.StatusOK, "auth.tmpl.html", gin.H{})
 		handled = true
@@ -519,35 +515,6 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = true
 	}
 	return handled
-}
-
-func GetLinks(c *gin.Context) {
-	db := middleware.GetDB(c)
-	sessionStore := middleware.GetSessionStore(c)
-
-	session, err := sessionStore.Get(c.Request, utils.SessionName)
-	if err != nil {
-		c.Error(err)
-	}
-
-	username, found := session.Values["username"].(string)
-	if !found || username == "" {
-		utils.HandleHtmlResponse(c, http.StatusForbidden, "links.tmpl.html", gin.H{
-			"count": 0,
-		})
-		return
-	}
-
-	clauses := make(map[string]interface{})
-	clauses["username"] = username
-
-	count, err := pg.GetURLCount(db, clauses)
-	if err != nil {
-		c.Error(err)
-	}
-	utils.HandleHtmlResponse(c, http.StatusOK, "links.tmpl.html", gin.H{
-		"count": count,
-	})
 }
 
 func HandleGetLinks(c *gin.Context) {
@@ -659,9 +626,29 @@ func GetNews(c *gin.Context) {
 func GetAnalytics(c *gin.Context) {
 	db := middleware.GetDB(c)
 
+	sessionStore := middleware.GetSessionStore(c)
+
+	var count int
+	session, err := sessionStore.Get(c.Request, utils.SessionName)
+	if err != nil {
+		c.Error(err)
+	}
+	username, found := session.Values["username"].(string)
+	if found && username != "" {
+		clauses := make(map[string]interface{})
+		clauses["username"] = username
+
+		count, err = pg.GetURLCount(db, clauses)
+		if err != nil {
+			c.Error(err)
+		}
+	}
+
 	submatches := tinyUrlRegexp.FindStringSubmatch(c.Query("url"))
 	if len(submatches) < 2 {
-		utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{})
+		utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{
+			"count": count,
+		})
 		return
 	}
 	slug := submatches[1]
@@ -673,15 +660,16 @@ func GetAnalytics(c *gin.Context) {
 		c.Error(err)
 		utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{
 			"error": "Invalid URL. Try again.",
+			"count": count,
 		})
 		return
 	}
 
-	var counter int
+	var clicks int
 	analytics := make([]models.Analytics, 0)
 
 	for _, stat := range stats {
-		counter += stat.Counter
+		clicks += stat.Counter
 		analytics = append(analytics, models.Analytics{
 			Country: stat.Country,
 			State:   stat.State,
@@ -694,14 +682,15 @@ func GetAnalytics(c *gin.Context) {
 
 	log.WithFields(log.Fields{
 		"url":       c.Query("url"),
-		"count":     counter,
+		"clicks":    clicks,
 		"analytics": analytics,
 	}).Info("Returned values")
 
 	utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{
 		"url":       c.Query("url"),
-		"count":     counter,
+		"clicks":    clicks,
 		"analytics": analytics,
+		"count":     count,
 	})
 	return
 }
