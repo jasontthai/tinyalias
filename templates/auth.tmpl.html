@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 {{template "header.tmpl.html" . }}
-<body class="bg-dark text-center">
+<body class="bg-dark">
 <nav class="navbar navbar-expand-sm navbar-dark py-5">
     <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
         <a class="navbar-brand mb-0 h1" href="/">TinyAlias</a>
@@ -45,7 +45,7 @@
         </div>
     {{ end }}
     {{ if .user }}
-        <div id="updatepasswordbox" class="justify-content-center">
+        <div id="updatepasswordbox" class="text-center">
             <form class="form-signin" method="post" action="/update-password">
                 <h1 class="h3 mb-3 font-weight-normal">Update Password</h1>
                 <label for="inputCurrentPassword" class="sr-only">Current Password</label>
@@ -58,14 +58,14 @@
             </form>
         </div>
     {{ else }}
-    <div id="loginbox" class="justify-content-center">
+    <div id="loginbox" class="text-center">
         <form class="form-signin" method="post" action="/login">
             <h1 class="h3 mb-3 font-weight-normal">Please Log In</h1>
             <label for="inputUsername" class="sr-only">Username</label>
             <input type="text" name="username" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
             <label for="inputPassword" class="sr-only">Password</label>
             <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
-            <button class="btn btn-lg btn-info btn-block" type="submit">Sign in</button>
+            <button class="btn btn-lg btn-info btn-block" type="submit">Log In</button>
             <div class="form-group mt-3">
                 <div class="col-md-12 control">
                     <div style="border-top: 1px solid#888; padding-top:15px; font-size:85%" >
@@ -79,16 +79,16 @@
         </form>
     </div>
 
-    <div id="signupbox" style="display:none;" class="justify-content-center">
+    <div id="signupbox" style="display:none;" class="text-center">
         <form class="form-signin" method="post" action="/register">
             <h1 class="h3 mb-3 font-weight-normal">Please Register</h1>
-            <label for="inputUsername" class="sr-only">Username</label>
-            <input type="text" name="username" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
-            <label for="inputPassword" class="sr-only">Password</label>
-            <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+            <label for="inputRegisterUsername" class="sr-only">Username</label>
+            <input type="text" name="username" id="inputRegisterUsername" class="form-control" placeholder="Username" required autofocus>
+            <label for="inputRegisterPassword" class="sr-only">Password</label>
+            <input type="password" name="password" id="inputRegisterPassword" class="form-control" placeholder="Password" required>
             <label for="inputConfirmPassword" class="sr-only">Confirm Password</label>
             <input type="password" name="confirm_password" id="inputConfirmPassword" class="form-control" placeholder="Confirm Password" required>
-            <button class="btn btn-lg btn-info btn-block" type="submit">Sign up</button>
+            <button class="btn btn-lg btn-info btn-block" type="submit">Register</button>
             <div class="form-group mt-3">
                 <div class="col-md-12 control">
                     <div style="border-top: 1px solid#888; padding-top:15px; font-size:85%" >
