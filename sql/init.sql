@@ -62,3 +62,6 @@ CREATE TABLE IF NOT EXISTS users (
   created timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated timestamp without time zone
 );
+
+ALTER TABLE urls
+  ADD COLUMN username text NOT NULL DEFAULT '';

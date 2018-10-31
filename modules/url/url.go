@@ -406,6 +406,18 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		urlObj.Expired = null.TimeFrom(expiration)
 	}
 
+	sessionStore := middleware.GetSessionStore(c)
+
+	session, err := sessionStore.Get(c.Request, auth.SessionName)
+	if err != nil {
+		c.Error(err)
+	}
+
+	username, found := session.Values["username"].(string)
+	if found {
+		urlObj.Username = username
+	}
+
 	// Run spam job on new link
 	err = pg.CreateURL(db, urlObj)
 	if err != nil {
