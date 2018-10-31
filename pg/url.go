@@ -44,8 +44,7 @@ func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	sb := psql.Select("*").
-		From("urls").OrderBy("created desc").
-		Where(squirrel.Eq{"password": ""})
+		From("urls").OrderBy("created desc")
 
 	if slug, ok := clauses["slug"].(string); ok {
 		sb = sb.Where(squirrel.Eq{"slug": slug})
