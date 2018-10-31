@@ -18,21 +18,17 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/zirius/tinyalias/middleware"
 	"github.com/zirius/tinyalias/models"
+	"github.com/zirius/tinyalias/modules/auth"
 	"github.com/zirius/tinyalias/modules/newsapi"
 	"github.com/zirius/tinyalias/modules/queue"
 	"github.com/zirius/tinyalias/modules/utils"
 	"github.com/zirius/tinyalias/pg"
 )
 
-var baseUrl string
-var baseAPIUrl string
 var secret string
 var tinyUrlRegexp *regexp.Regexp
 
 func init() {
-	baseUrl = os.Getenv("BASE_URL")
-	baseAPIUrl = os.Getenv("API_BASE_URL")
-
 	// secret in order to use API GET route
 	secret = os.Getenv("SECRET")
 	tinyUrlRegexp = regexp.MustCompile(os.Getenv("BASE_URL") + "(.+)")
@@ -43,8 +39,6 @@ const (
 	ExpiredQuery     = "expired"
 	ThreatQuery      = "threat"
 	SlugQuery        = "slug"
-	BaseURL          = "baseUrl"
-	BaseAPIURL       = "APIUrl"
 	XForwardedHeader = "X-Forwarded-For"
 	DefaultLimit     = 20
 	DefaultOffset    = 0
@@ -82,8 +76,7 @@ func GetHomePage(c *gin.Context) {
 		error = "The link you entered has expired. Fancy creating one?"
 	}
 
-	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
-		BaseURL: baseUrl,
+	utils.HandleHtmlResponse(c, http.StatusOK, "main.tmpl.html", gin.H{
 		"error": error,
 	})
 }
@@ -102,9 +95,8 @@ func CreateURL(c *gin.Context) {
 		expirationTime, err = time.Parse("01/02/2006 3:04 PM", expiration)
 		if err != nil {
 			c.Error(err)
-			c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
+			utils.HandleHtmlResponse(c, http.StatusInternalServerError, "main.tmpl.html", gin.H{
 				"error": "Oops. Something went wrong. Please try again.",
-				BaseURL: baseUrl,
 			})
 			return
 		}
@@ -113,18 +105,16 @@ func CreateURL(c *gin.Context) {
 	shortened, err := createURL(c, url, slug, password, expirationTime, mindful == "true")
 	if err != nil {
 		c.Error(err)
-		c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
+		utils.HandleHtmlResponse(c, http.StatusInternalServerError, "main.tmpl.html", gin.H{
 			"error":    fmt.Errorf("Something went wrong: %v", err.Error()),
 			"original": url,
-			BaseURL:    baseUrl,
 		})
 		return
 	}
 
-	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+	utils.HandleHtmlResponse(c, http.StatusOK, "main.tmpl.html", gin.H{
 		"url":      shortened,
 		"original": url,
-		BaseURL:    baseUrl,
 	})
 }
 
@@ -188,24 +178,20 @@ func Get(c *gin.Context) {
 			if c.Query("password") != "" {
 				err = models.VerifyPassword(urlObj.Password, c.Query("password"))
 				if err != nil {
-					c.HTML(http.StatusOK, "password.tmpl.html", gin.H{
-						"baseUrl": baseUrl,
-						"error":   "Wrong Password. Try Again.",
+					utils.HandleHtmlResponse(c, http.StatusOK, "password.tmpl.html", gin.H{
+						"error": "Wrong Password. Try Again.",
 					})
 					return
 				}
 			} else {
-				c.HTML(http.StatusOK, "password.tmpl.html", gin.H{
-					"baseUrl": baseUrl,
-				})
+				utils.HandleHtmlResponse(c, http.StatusOK, "password.tmpl.html", gin.H{})
 				return
 			}
 		}
 
 		if urlObj.Mindful {
-			c.HTML(http.StatusOK, "mindful.tmpl.html", gin.H{
-				"baseUrl": baseUrl,
-				"url":     urlObj.Url,
+			utils.HandleHtmlResponse(c, http.StatusOK, "mindful.tmpl.html", gin.H{
+				"url": urlObj.Url,
 			})
 			return
 		}
@@ -333,6 +319,13 @@ func APIGetURL(c *gin.Context) {
 func APIGetURLs(c *gin.Context) {
 	db := middleware.GetDB(c)
 
+	if secret != c.Query("secret") {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+		})
+		return
+	}
+
 	limit, offset, err := GetLimitAndOffsetQueries(c)
 	if err != nil {
 		c.Error(err)
@@ -396,7 +389,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		return "", err
 	}
 	if urlObj != nil {
-		return baseUrl + urlObj.Slug, nil
+		return utils.BaseUrl + urlObj.Slug, nil
 	}
 
 	if slug == "" {
@@ -426,12 +419,24 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		urlObj.Expired = null.TimeFrom(expiration)
 	}
 
+	sessionStore := middleware.GetSessionStore(c)
+
+	session, err := sessionStore.Get(c.Request, auth.SessionName)
+	if err != nil {
+		c.Error(err)
+	}
+
+	username, found := session.Values["username"].(string)
+	if found && username != "" {
+		urlObj.Username = username
+	}
+
 	// Run spam job on new link
 	err = pg.CreateURL(db, urlObj)
 	if err != nil {
 		return "", err
 	}
-	shortened = baseUrl + urlObj.Slug
+	shortened = utils.BaseUrl + urlObj.Slug
 
 	// Dispatch ParseGeoRequestJob
 	if err := queue.DispatchDetectSpamJob(qc, url); err != nil {
@@ -469,6 +474,10 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		APICreateURL(c)
 		handled = true
 	}
+	if slug == "get" {
+		HandleGetLinks(c)
+		handled = true
+	}
 	if slug == "shorten" {
 		CreateURL(c)
 		handled = true
@@ -490,9 +499,7 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = true
 	}
 	if slug == "api" {
-		c.HTML(http.StatusOK, "api.tmpl.html", gin.H{
-			BaseURL: baseUrl,
-		})
+		utils.HandleHtmlResponse(c, http.StatusOK, "api.tmpl.html", gin.H{})
 		handled = true
 	}
 	if slug == "news" {
@@ -500,20 +507,95 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = true
 	}
 	if slug == "links" {
-		db := middleware.GetDB(c)
-		count, err := pg.GetURLWithoutPasswordCount(db)
-		if err != nil {
-			c.Error(err)
-		}
-		c.HTML(http.StatusOK, "links.tmpl.html", gin.H{
-			BaseURL:    baseUrl,
-			BaseAPIURL: baseAPIUrl,
-			"count":    count,
-		})
+		GetLinks(c)
 		handled = true
 	}
-
+	if slug == "auth" {
+		utils.HandleHtmlResponse(c, http.StatusOK, "auth.tmpl.html", gin.H{})
+		handled = true
+	}
+	if slug == "logout" {
+		auth.Logout(c)
+		handled = true
+	}
 	return handled
+}
+
+func GetLinks(c *gin.Context) {
+	db := middleware.GetDB(c)
+	sessionStore := middleware.GetSessionStore(c)
+
+	session, err := sessionStore.Get(c.Request, auth.SessionName)
+	if err != nil {
+		c.Error(err)
+	}
+
+	username, found := session.Values["username"].(string)
+	if !found || username == "" {
+		utils.HandleHtmlResponse(c, http.StatusForbidden, "links.tmpl.html", gin.H{
+			"count": 0,
+		})
+		return
+	}
+
+	clauses := make(map[string]interface{})
+	clauses["username"] = username
+
+	count, err := pg.GetURLCount(db, clauses)
+	if err != nil {
+		c.Error(err)
+	}
+	utils.HandleHtmlResponse(c, http.StatusOK, "links.tmpl.html", gin.H{
+		"count": count,
+	})
+}
+
+func HandleGetLinks(c *gin.Context) {
+	db := middleware.GetDB(c)
+
+	sessionStore := middleware.GetSessionStore(c)
+
+	session, err := sessionStore.Get(c.Request, auth.SessionName)
+	if err != nil {
+		c.Error(err)
+	}
+
+	username, found := session.Values["username"].(string)
+	if !found || username == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+		})
+	}
+
+	limit, offset, err := GetLimitAndOffsetQueries(c)
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	clauses := make(map[string]interface{})
+	clauses["_limit"] = limit
+	clauses["_offset"] = offset
+	clauses["username"] = username
+	urls, err := pg.GetURLs(db, clauses)
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    urls,
+	})
+	return
 }
 
 func HandleCopySignal(c *gin.Context) {
@@ -564,14 +646,12 @@ func GetNews(c *gin.Context) {
 	articles, err := client.GetTopHeadlines()
 	if err != nil {
 		c.Error(err)
-		c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
+		utils.HandleHtmlResponse(c, http.StatusOK, "news.tmpl.html", gin.H{
 			"error": err.Error(),
-			BaseURL: baseUrl,
 		})
 	} else {
-		c.HTML(http.StatusOK, "news.tmpl.html", gin.H{
+		utils.HandleHtmlResponse(c, http.StatusOK, "news.tmpl.html", gin.H{
 			"articles": articles,
-			BaseURL:    baseUrl,
 		})
 	}
 }
@@ -581,9 +661,7 @@ func GetAnalytics(c *gin.Context) {
 
 	submatches := tinyUrlRegexp.FindStringSubmatch(c.Query("url"))
 	if len(submatches) < 2 {
-		c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
-			BaseURL: baseUrl,
-		})
+		utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{})
 		return
 	}
 	slug := submatches[1]
@@ -593,9 +671,8 @@ func GetAnalytics(c *gin.Context) {
 	})
 	if err != nil {
 		c.Error(err)
-		c.HTML(http.StatusInternalServerError, "analytics.tmpl.html", gin.H{
+		utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{
 			"error": "Invalid URL. Try again.",
-			BaseURL: baseUrl,
 		})
 		return
 	}
@@ -621,11 +698,10 @@ func GetAnalytics(c *gin.Context) {
 		"analytics": analytics,
 	}).Info("Returned values")
 
-	c.HTML(http.StatusOK, "analytics.tmpl.html", gin.H{
+	utils.HandleHtmlResponse(c, http.StatusOK, "analytics.tmpl.html", gin.H{
 		"url":       c.Query("url"),
 		"count":     counter,
 		"analytics": analytics,
-		BaseURL:     baseUrl,
 	})
 	return
 }

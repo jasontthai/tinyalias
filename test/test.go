@@ -23,6 +23,17 @@ func GetTestPgURL() string {
 	return database
 }
 
+func GetTestSessionKeys() (authKey, encryptKey string) {
+	authKey = os.Getenv("SESSION_AUTHENTICATION_KEY")
+	if authKey == "" {
+		authKey = "123"
+	}
+	encryptKey = os.Getenv("SESSION_ENCRYPTION_KEY")
+	if encryptKey == "" {
+		encryptKey = "WlFbVowe"
+	}
+}
+
 func GetTestRouter() *gin.Engine {
 	// Que-Go
 	pgxpool, qc, err := queue.Setup(GetTestPgURL())
@@ -50,6 +61,9 @@ func GetTestRouter() *gin.Engine {
 	router.Use(middleware.Database(GetTestPgURL()))
 	router.Use(middleware.Que(pgxpool, qc))
 	router.Use(mgin.NewMiddleware(limiter.New(store, rate)))
+
+	authKey, encryptKey := GetTestSessionKeys()
+	router.Use(middleware.SessionStore(authKey, encryptKey))
 
 	return router
 }

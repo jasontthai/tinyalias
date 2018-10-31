@@ -25,12 +25,13 @@ type URL struct {
 	Password string    `json:"-" db:"password"`
 	Expired  null.Time `json:"expired" db:"expired"`
 	Mindful  bool      `json:"mindful" db:"mindful"`
+	Username string    `json:"username" db:"username"'`
 }
 
 func TransformPassword(val string) (string, error) {
 	pwbytes, err := bcrypt.GenerateFromPassword([]byte(val), bcrypt.DefaultCost)
 	if err != nil {
-		return val, fmt.Errorf("password encryption error: %s\n", err.Error())
+		return val, fmt.Errorf("password encryption error: %s", err.Error())
 	}
 	return string(pwbytes), nil
 }

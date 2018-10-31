@@ -17,6 +17,7 @@ import (
 	mgin "github.com/ulule/limiter/drivers/middleware/gin"
 	"github.com/ulule/limiter/drivers/store/memory"
 	"github.com/zirius/tinyalias/middleware"
+	"github.com/zirius/tinyalias/modules/auth"
 	"github.com/zirius/tinyalias/modules/queue"
 	"github.com/zirius/tinyalias/modules/url"
 )
@@ -36,6 +37,17 @@ func main() {
 	database := os.Getenv("DATABASE_URL")
 	if database == "" {
 		log.Fatal("$DATABASE_URL must be set")
+	}
+
+	sessionAuthKey := os.Getenv("SESSION_AUTHENTICATION_KEY")
+	if sessionAuthKey == "" {
+		log.Fatal("$SESSION_AUTHENTICATION_KEY must be set")
+	}
+
+	// 8, 16, or 32 byte string
+	sessionEncryptKey := os.Getenv("SESSION_ENCRYPTION_KEY")
+	if sessionEncryptKey == "" {
+		log.Fatal("$SESSION_ENCRYPTION_KEY must be set")
 	}
 
 	// Que-Go
@@ -65,6 +77,7 @@ func main() {
 	router.Use(middleware.Database(database))
 	router.Use(middleware.Que(pgxpool, qc))
 	router.Use(mgin.NewMiddleware(limiter.New(store, rate)))
+	router.Use(middleware.SessionStore(sessionAuthKey, sessionEncryptKey))
 	router.ForwardedByClientIP = true
 	router.Use(cors.New(cors.Config{
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -88,6 +101,9 @@ func main() {
 
 	router.GET("", url.GetHomePage)
 	router.GET("/:slug", url.Get)
+	router.POST("/login", auth.Login)
+	router.POST("/register", auth.Register)
+	router.POST("/update-password", auth.UpdatePassword)
 
 	router.Run(":" + port)
 }

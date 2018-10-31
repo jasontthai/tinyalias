@@ -59,6 +59,10 @@ func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) 
 		sb = sb.Where(squirrel.Eq{"status": status})
 	}
 
+	if username, ok := clauses["username"].(string); ok {
+		sb = sb.Where(squirrel.Eq{"username": username})
+	}
+
 	if limit, ok := clauses["_limit"].(uint64); ok {
 		sb = sb.Limit(limit)
 	}
@@ -90,10 +94,26 @@ func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) 
 	return urls, nil
 }
 
-func GetURLWithoutPasswordCount(db *sqlx.DB) (int, error) {
+func GetURLCount(db *sqlx.DB, clauses map[string]interface{}) (int, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	sb := psql.Select("count(*)").
-		From("urls").Where(squirrel.Eq{"password": ""})
+		From("urls")
+
+	if slug, ok := clauses["slug"].(string); ok {
+		sb = sb.Where(squirrel.Eq{"slug": slug})
+	}
+
+	if url, ok := clauses["url"].(string); ok {
+		sb = sb.Where(squirrel.Eq{"url": url})
+	}
+
+	if status, ok := clauses["status"].(string); ok {
+		sb = sb.Where(squirrel.Eq{"status": status})
+	}
+
+	if username, ok := clauses["username"].(string); ok {
+		sb = sb.Where(squirrel.Eq{"username": username})
+	}
 
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
@@ -110,8 +130,8 @@ func GetURLWithoutPasswordCount(db *sqlx.DB) (int, error) {
 
 func CreateURL(db *sqlx.DB, url *models.URL) error {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	sb := psql.Insert("urls").Columns("url, slug, ip, counter, created, updated, password, expired, mindful").
-		Values(url.Url, url.Slug, url.IP, url.Counter, url.Created, url.Updated, url.Password, url.Expired, url.Mindful)
+	sb := psql.Insert("urls").Columns("url, slug, ip, counter, created, updated, password, expired, mindful, username").
+		Values(url.Url, url.Slug, url.IP, url.Counter, url.Created, url.Updated, url.Password, url.Expired, url.Mindful, url.Username)
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {
 		return err
