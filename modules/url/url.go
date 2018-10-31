@@ -420,7 +420,6 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 	}
 
 	sessionStore := middleware.GetSessionStore(c)
-
 	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)
@@ -519,9 +518,7 @@ func handleSpecialRoutes(c *gin.Context) bool {
 
 func HandleGetLinks(c *gin.Context) {
 	db := middleware.GetDB(c)
-
 	sessionStore := middleware.GetSessionStore(c)
-
 	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)
@@ -627,12 +624,11 @@ func GetAnalytics(c *gin.Context) {
 	db := middleware.GetDB(c)
 
 	sessionStore := middleware.GetSessionStore(c)
-
-	var count int
 	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)
 	}
+	var count int
 	username, found := session.Values["username"].(string)
 	if found && username != "" {
 		clauses := make(map[string]interface{})

@@ -64,7 +64,6 @@ func Login(c *gin.Context) {
 
 func Logout(c *gin.Context) {
 	sessionStore := middleware.GetSessionStore(c)
-
 	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)
@@ -158,7 +157,6 @@ func Register(c *gin.Context) {
 
 func UpdatePassword(c *gin.Context) {
 	sessionStore := middleware.GetSessionStore(c)
-
 	session, err := sessionStore.Get(c.Request, utils.SessionName)
 	if err != nil {
 		c.Error(err)

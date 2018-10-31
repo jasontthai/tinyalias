@@ -37,7 +37,6 @@ func GenerateSlug(size int) string {
 
 func HandleHtmlResponse(c *gin.Context, statusCode int, template string, h gin.H) {
 	sessionStore := middleware.GetSessionStore(c)
-
 	session, err := sessionStore.Get(c.Request, SessionName)
 	if err != nil {
 		c.Error(err)
