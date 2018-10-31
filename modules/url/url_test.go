@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/zirius/tinyalias/modules/utils"
+	"github.com/zirius/tinyalias/models"
 	"github.com/zirius/tinyalias/test"
 )
 
@@ -17,7 +17,7 @@ func TestCreateURL(t *testing.T) {
 	router := test.GetTestRouter()
 	router.GET("/", CreateURL)
 	router.GET("/:slug", Get)
-	slug := utils.GenerateSlug(6)
+	slug := models.GenerateSlug(6)
 
 	{
 		w := httptest.NewRecorder()

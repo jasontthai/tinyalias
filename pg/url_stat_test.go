@@ -5,13 +5,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/zirius/tinyalias/models"
-	"github.com/zirius/tinyalias/modules/utils"
 )
 
 func TestURLStat(t *testing.T) {
 	db := setup(t)
 
-	slug := utils.GenerateSlug(6)
+	slug := models.GenerateSlug(6)
 	urlStat := &models.URLStat{
 		Slug:    slug,
 		Counter: 1,

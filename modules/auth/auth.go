@@ -8,9 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/zirius/tinyalias/middleware"
 	"github.com/zirius/tinyalias/models"
-	"github.com/zirius/tinyalias/modules/utils"
 	"github.com/zirius/tinyalias/pg"
 )
+
+const SessionName = "My-Session"
 
 func Login(c *gin.Context) {
 	username := c.PostForm("username")
@@ -32,6 +33,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	if user.Status != "active" {
+		c.HTML(http.StatusBadRequest, "auth.tmpl.html", gin.H{
+			"error": "User is no longer active.",
+		})
+		return
+	}
+
 	err = models.VerifyPassword(user.Password, password)
 	if err != nil {
 		c.HTML(http.StatusBadRequest, "auth.tmpl.html", gin.H{
@@ -41,7 +49,7 @@ func Login(c *gin.Context) {
 	}
 
 	sessionStore := middleware.GetSessionStore(c)
-	session, err := sessionStore.Get(c.Request, utils.SessionName)
+	session, err := sessionStore.Get(c.Request, SessionName)
 	if err != nil {
 		c.Error(err)
 		c.HTML(http.StatusInternalServerError, "auth.tmpl.html", gin.H{
@@ -64,7 +72,7 @@ func Login(c *gin.Context) {
 
 func Logout(c *gin.Context) {
 	sessionStore := middleware.GetSessionStore(c)
-	session, err := sessionStore.Get(c.Request, utils.SessionName)
+	session, err := sessionStore.Get(c.Request, SessionName)
 	if err != nil {
 		c.Error(err)
 		c.Redirect(http.StatusFound, "/")
@@ -133,7 +141,7 @@ func Register(c *gin.Context) {
 	}
 
 	sessionStore := middleware.GetSessionStore(c)
-	session, err := sessionStore.Get(c.Request, utils.SessionName)
+	session, err := sessionStore.Get(c.Request, SessionName)
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -156,16 +164,11 @@ func Register(c *gin.Context) {
 }
 
 func UpdatePassword(c *gin.Context) {
-	sessionStore := middleware.GetSessionStore(c)
-	session, err := sessionStore.Get(c.Request, utils.SessionName)
-	if err != nil {
-		c.Error(err)
-	}
-
-	username, found := session.Values["username"].(string)
-	if !found || username == "" {
-		c.HTML(http.StatusInternalServerError, "auth.tmpl.html", gin.H{
-			"error": "Something went wrong. Try again.",
+	user := GetAuthenticatedUser(c)
+	username := user.Username
+	if user == nil {
+		c.HTML(http.StatusBadRequest, "auth.tmpl.html", gin.H{
+			"error": "You have to be logged in.",
 		})
 		return
 	}
@@ -236,4 +239,23 @@ func UpdatePassword(c *gin.Context) {
 		"message": "Successfully updated password.",
 		"user":    username,
 	})
+}
+
+func GetAuthenticatedUser(c *gin.Context) *models.User {
+	db := middleware.GetDB(c)
+	sessionStore := middleware.GetSessionStore(c)
+	session, err := sessionStore.Get(c.Request, SessionName)
+	if err != nil {
+		c.Error(err)
+	}
+
+	username, found := session.Values["username"].(string)
+	if found && username != "" {
+		user, err := pg.GetUser(db, username)
+		if err != nil {
+			c.Error(err)
+		}
+		return user
+	}
+	return nil
 }

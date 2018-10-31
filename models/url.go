@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/guregu/null"
@@ -9,6 +10,7 @@ import (
 )
 
 const (
+	base    = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
 	Active  = "active"
 	Pending = "pending"
 	Expired = "expired"
@@ -38,4 +40,16 @@ func TransformPassword(val string) (string, error) {
 
 func VerifyPassword(hashedPassword string, val string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(val))
+}
+
+func GenerateSlug(size int) string {
+	s := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(s)
+
+	var slug string
+	for i := 0; i < size; i++ {
+		idx := r.Intn(len(base))
+		slug = slug + string(base[idx])
+	}
+	return slug
 }

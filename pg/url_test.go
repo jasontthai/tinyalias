@@ -7,7 +7,6 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/zirius/tinyalias/models"
-	"github.com/zirius/tinyalias/modules/utils"
 	"github.com/zirius/tinyalias/test"
 )
 
@@ -20,7 +19,7 @@ func setup(t *testing.T) *sqlx.DB {
 func TestURL(t *testing.T) {
 	db := setup(t)
 
-	slug := utils.GenerateSlug(6)
+	slug := models.GenerateSlug(6)
 	url := &models.URL{
 		Url:  "https://example.com",
 		Slug: slug,

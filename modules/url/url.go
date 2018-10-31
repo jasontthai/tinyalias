@@ -393,7 +393,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 	}
 
 	if slug == "" {
-		slug = utils.GenerateSlug(6)
+		slug = models.GenerateSlug(6)
 	}
 
 	ip := c.ClientIP()
@@ -419,15 +419,9 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		urlObj.Expired = null.TimeFrom(expiration)
 	}
 
-	sessionStore := middleware.GetSessionStore(c)
-	session, err := sessionStore.Get(c.Request, utils.SessionName)
-	if err != nil {
-		c.Error(err)
-	}
-
-	username, found := session.Values["username"].(string)
-	if found && username != "" {
-		urlObj.Username = username
+	user := auth.GetAuthenticatedUser(c)
+	if user != nil {
+		urlObj.Username = user.Username
 	}
 
 	// Run spam job on new link
@@ -518,14 +512,9 @@ func handleSpecialRoutes(c *gin.Context) bool {
 
 func HandleGetLinks(c *gin.Context) {
 	db := middleware.GetDB(c)
-	sessionStore := middleware.GetSessionStore(c)
-	session, err := sessionStore.Get(c.Request, utils.SessionName)
-	if err != nil {
-		c.Error(err)
-	}
 
-	username, found := session.Values["username"].(string)
-	if !found || username == "" {
+	user := auth.GetAuthenticatedUser(c)
+	if user == nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"success": false,
 		})
@@ -544,7 +533,7 @@ func HandleGetLinks(c *gin.Context) {
 	clauses := make(map[string]interface{})
 	clauses["_limit"] = limit
 	clauses["_offset"] = offset
-	clauses["username"] = username
+	clauses["username"] = user.Username
 	urls, err := pg.GetURLs(db, clauses)
 	if err != nil {
 		c.Error(err)
@@ -623,16 +612,12 @@ func GetNews(c *gin.Context) {
 func GetAnalytics(c *gin.Context) {
 	db := middleware.GetDB(c)
 
-	sessionStore := middleware.GetSessionStore(c)
-	session, err := sessionStore.Get(c.Request, utils.SessionName)
-	if err != nil {
-		c.Error(err)
-	}
+	user := auth.GetAuthenticatedUser(c)
 	var count int
-	username, found := session.Values["username"].(string)
-	if found && username != "" {
+	var err error
+	if user != nil {
 		clauses := make(map[string]interface{})
-		clauses["username"] = username
+		clauses["username"] = user.Username
 
 		count, err = pg.GetURLCount(db, clauses)
 		if err != nil {
