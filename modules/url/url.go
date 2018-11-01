@@ -570,6 +570,10 @@ func HandleDeleteLinks(c *gin.Context) {
 		return
 	}
 
+	log.WithField("slug", slug).
+		WithField("url", urlStr).
+		Info("Deleted URL")
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 	})
@@ -586,6 +590,7 @@ func HandleGetLinks(c *gin.Context) {
 	}
 
 	limit, offset, err := utils.DataTableGetStartAndLengthQueries(c)
+	logEntry := log.WithField("limit", limit).WithField("offset", offset)
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -602,8 +607,9 @@ func HandleGetLinks(c *gin.Context) {
 		orderStr := c.PostForm("order[0][dir]")
 		orderByStr = fmt.Sprintf("%v %v", columnName, orderStr)
 
-		log.WithField("order_by", orderByStr).Info("ordering table")
+		logEntry = logEntry.WithField("order_by", orderByStr)
 	}
+	logEntry.Info("table get")
 
 	drawStr := c.PostForm("draw")
 	draw, err := strconv.ParseInt(drawStr, 10, 32)

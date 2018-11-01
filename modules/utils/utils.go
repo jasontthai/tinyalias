@@ -62,7 +62,7 @@ func GetLimitAndOffsetQueries(c *gin.Context) (limit, offset uint64, err error) 
 }
 
 func DataTableGetStartAndLengthQueries(c *gin.Context) (limit, offset uint64, err error) {
-	startStr := c.Query("start")
+	startStr := c.PostForm("start")
 	if startStr != "" {
 		offset, err = strconv.ParseUint(startStr, 10, 32)
 		if err != nil {
@@ -71,7 +71,7 @@ func DataTableGetStartAndLengthQueries(c *gin.Context) (limit, offset uint64, er
 	} else {
 		offset = DefaultOffset
 	}
-	lengthStr := c.Query("length")
+	lengthStr := c.PostForm("length")
 	if lengthStr != "" {
 		limit, err = strconv.ParseUint(lengthStr, 10, 32)
 		if err != nil {
