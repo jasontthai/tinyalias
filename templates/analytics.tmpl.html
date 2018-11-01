@@ -131,7 +131,7 @@
         $.ajax({
             type: "post",
             url: "/del",
-            data: 'slug=' + slug + '&url=' + url,
+            data: 'slug=' + encodeURIComponent(slug) + '&url=' + encodeURIComponent(url),
             success: function (data) {
                 $('#therow-'+idx).remove();
             }
