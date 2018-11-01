@@ -71,18 +71,18 @@
         <table class="table" id="thetable">
             <thead>
             <tr>
-                <th scope="col">#</th>
-                <th scope="col">Clicks</th>
-                <th scope="col">TinyAlias</th>
-                <th scope="col">Original</th>
-                <th scope="col">Manage</th>
+                <th class="col-auto" scope="col">#</th>
+                <th class="col-auto" scope="col">Clicks</th>
+                <th class="col-auto" scope="col">TinyAlias</th>
+                <th class="col-auto" scope="col">Original</th>
+                <th class="col-auto" scope="col">Manage</th>
             </tr>
             </thead>
             <tbody id="thebody">
             </tbody>
         </table>
-        <ul id="pagination" class="pagination-sm justify-content-center"></ul>
     </div>
+    <ul id="pagination" class="pagination-sm justify-content-center"></ul>
 {{ end }}
 </div>
 </body>
@@ -116,8 +116,8 @@
                         trHTML += '<tr id="therow-' + idx + '">' +
                                 '<th scope="row">' + idx + '</th>' +
                                 '<td>' + data.data[i].counter + '</td>' +
-                                '<td><a href="' + {{ .baseUrl }} + data.data[i].slug +'">' + {{ .baseUrl }} + data.data[i].slug + '</a></td>' +
-                                '<td><a href="' + data.data[i].url +'">' + data.data[i].url +'</a></td>' +
+                                '<td style="word-wrap: break-word;max-width: 200px; text-overflow: ellipsis; overflow:hidden; white-space: nowrap;"><a href="' + {{ .baseUrl }} + data.data[i].slug +'">' + {{ .baseUrl }} + data.data[i].slug + '</a></td>' +
+                                '<td style="word-wrap: break-word;max-width: 400px; text-overflow: ellipsis; overflow:hidden; white-space: nowrap;"><a href="' + data.data[i].url +'">' + data.data[i].url +'</a></td>' +
                                 '<td><a data-toggle="tooltip" data-placement="top" data-original-title="Delete" href="#/" onClick="del(\'' + idx +'\',\'' + data.data[i].slug + '\',\'' + data.data[i].url + '\');"><i class="fa fa-times" aria-hidden="true"></i></a></td>' +
                                 '</tr>';
                     }
