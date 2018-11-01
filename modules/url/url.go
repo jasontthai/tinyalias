@@ -2,7 +2,6 @@ package url
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
 	url2 "net/url"
@@ -40,8 +39,6 @@ const (
 	ThreatQuery      = "threat"
 	SlugQuery        = "slug"
 	XForwardedHeader = "X-Forwarded-For"
-	DefaultLimit     = 20
-	DefaultOffset    = 0
 )
 
 type APIResponse struct {
@@ -326,7 +323,7 @@ func APIGetURLs(c *gin.Context) {
 		return
 	}
 
-	limit, offset, err := GetLimitAndOffsetQueries(c)
+	limit, offset, err := utils.GetLimitAndOffsetQueries(c)
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -547,7 +544,7 @@ func HandleGetLinks(c *gin.Context) {
 		})
 	}
 
-	limit, offset, err := GetLimitAndOffsetQueries(c)
+	limit, offset, err := utils.DataTableGetStartAndLengthQueries(c)
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -557,13 +554,45 @@ func HandleGetLinks(c *gin.Context) {
 		return
 	}
 
+	var orderByStr string
+	if c.Query("order[0][column]") != "" && c.Query("order[0][dir]") != "" {
+		sortColumnStr := c.Query("order[0][column]")
+		columnName := c.Query(fmt.Sprintf("columns[%v][data]", sortColumnStr))
+		orderStr := c.Query("order[0][dir]")
+		orderByStr = fmt.Sprintf("%v %v", columnName, orderStr)
+
+		log.WithField("order_by", orderByStr).Info("ordering table")
+	}
+
+	drawStr := c.Query("draw")
+	draw, err := strconv.ParseInt(drawStr, 10, 32)
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	searchStr := c.Query("search[value]")
+	if searchStr != "" {
+		// TODO only search for searchable column
+		searchStr = fmt.Sprintf(`%%%v%%`, searchStr)
+	}
+
 	clauses := make(map[string]interface{})
+	countClauses := make(map[string]interface{})
+
 	clauses["_limit"] = limit
 	clauses["_offset"] = offset
+	clauses["_order_by"] = orderByStr
+	clauses["_like"] = searchStr
 
 	// allow admin to query for all urls
 	if user.Role != models.RoleAdmin {
 		clauses["username"] = user.Username
+		countClauses["username"] = user.Username
 	}
 	urls, err := pg.GetURLs(db, clauses)
 	if err != nil {
@@ -575,9 +604,34 @@ func HandleGetLinks(c *gin.Context) {
 		return
 	}
 
+	totalCount, err := pg.GetURLCount(db, countClauses)
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	//filtered count
+	countClauses["_like"] = searchStr
+	filteredCount, err := pg.GetURLCount(db, countClauses)
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"data":    urls,
+		"success":         true,
+		"data":            urls,
+		"draw":            draw,
+		"recordsTotal":    totalCount,
+		"recordsFiltered": filteredCount,
 	})
 	return
 }
@@ -708,30 +762,4 @@ func GetAnalytics(c *gin.Context) {
 		"count":     count,
 	})
 	return
-}
-
-func GetLimitAndOffsetQueries(c *gin.Context) (limit, offset uint64, err error) {
-	offsetStr := c.Query("offset")
-	if offsetStr != "" {
-		offset, err = strconv.ParseUint(offsetStr, 10, 32)
-		if err != nil {
-			return 0, 0, err
-		}
-	} else {
-		offset = DefaultOffset
-	}
-
-	limitStr := c.Query("limit")
-	if limitStr != "" {
-		limit, err = strconv.ParseUint(limitStr, 10, 32)
-		if err != nil {
-			return 0, 0, err
-		}
-	} else {
-		limit = DefaultLimit
-	}
-	if limit > 100 {
-		return 0, 0, errors.New("limit must be <= 100")
-	}
-	return limit, offset, err
 }
