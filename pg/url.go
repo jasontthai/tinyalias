@@ -7,7 +7,6 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	"github.com/sirupsen/logrus"
 	"github.com/zirius/tinyalias/models"
 )
 
@@ -84,7 +83,6 @@ func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) 
 	}
 
 	sqlStr, args, err := sb.ToSql()
-	logrus.Info(sqlStr)
 	if err != nil {
 		return nil, err
 	}

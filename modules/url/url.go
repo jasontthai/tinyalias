@@ -457,10 +457,6 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		return true
 	}
 	switch slug {
-	case "create":
-		APICreateURL(c)
-	case "get":
-		HandleGetLinks(c)
 	case "shorten":
 		CreateURL(c)
 	case "favicon.ico":
@@ -483,6 +479,51 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		handled = false
 	}
 	return handled
+}
+
+func HandleCreateLink(c *gin.Context) {
+	url := c.PostForm("url")
+	slug := c.PostForm("alias")
+	password := c.PostForm("password")
+	expired := c.PostForm("expiration")
+	mindful := c.PostForm("mindful")
+
+	var expiration time.Time
+	if expired != "" {
+		i, err := strconv.ParseInt(expired, 10, 64)
+		if err != nil {
+			c.Error(err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"error":   "Failed to parse expiration. Expiration must be unix timestamp",
+			})
+			return
+		}
+		expiration = time.Unix(i, 0)
+	}
+
+	shortened, err := createURL(c, url, slug, password, expiration, mindful == "true")
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	res := APIResponse{
+		Success:  true,
+		Password: password,
+		Short:    shortened,
+		Original: url,
+	}
+	if !expiration.Equal(time.Time{}) {
+		res.Expiration = expiration.Unix()
+	}
+
+	c.JSON(http.StatusOK, res)
+	return
 }
 
 func HandleDeleteLinks(c *gin.Context) {
@@ -555,16 +596,16 @@ func HandleGetLinks(c *gin.Context) {
 	}
 
 	var orderByStr string
-	if c.Query("order[0][column]") != "" && c.Query("order[0][dir]") != "" {
-		sortColumnStr := c.Query("order[0][column]")
-		columnName := c.Query(fmt.Sprintf("columns[%v][data]", sortColumnStr))
-		orderStr := c.Query("order[0][dir]")
+	if c.PostForm("order[0][column]") != "" && c.PostForm("order[0][dir]") != "" {
+		sortColumnStr := c.PostForm("order[0][column]")
+		columnName := c.PostForm(fmt.Sprintf("columns[%v][data]", sortColumnStr))
+		orderStr := c.PostForm("order[0][dir]")
 		orderByStr = fmt.Sprintf("%v %v", columnName, orderStr)
 
 		log.WithField("order_by", orderByStr).Info("ordering table")
 	}
 
-	drawStr := c.Query("draw")
+	drawStr := c.PostForm("draw")
 	draw, err := strconv.ParseInt(drawStr, 10, 32)
 	if err != nil {
 		c.Error(err)
@@ -575,7 +616,7 @@ func HandleGetLinks(c *gin.Context) {
 		return
 	}
 
-	searchStr := c.Query("search[value]")
+	searchStr := c.PostForm("search[value]")
 	if searchStr != "" {
 		// TODO only search for searchable column
 		searchStr = fmt.Sprintf(`%%%v%%`, searchStr)
