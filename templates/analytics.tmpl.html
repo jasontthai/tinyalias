@@ -104,7 +104,7 @@
         next: 'Next',
         prev: 'Prev',
         onPageClick: function (event, page) {
-            $.ajax( {
+            $.ajax({
                 url: '/get?offset=' + (page-1)*limit + '&limit=' + limit,
                 success: function(data) {
                     if (data.data == undefined) {
@@ -129,7 +129,9 @@
 
     function del(idx, slug, url) {
         $.ajax({
-            url: '/del?slug=' + slug + '&url=' + url,
+            type: "post",
+            url: "/del",
+            data: 'slug=' + slug + '&url=' + url,
             success: function (data) {
                 $('#therow-'+idx).remove();
             }

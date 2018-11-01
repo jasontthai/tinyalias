@@ -460,14 +460,10 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		return true
 	}
 	switch slug {
-	case "signal":
-		HandleCopySignal(c)
 	case "create":
 		APICreateURL(c)
 	case "get":
 		HandleGetLinks(c)
-	case "del":
-		HandleDeleteLinks(c)
 	case "shorten":
 		CreateURL(c)
 	case "favicon.ico":
@@ -494,8 +490,8 @@ func handleSpecialRoutes(c *gin.Context) bool {
 
 func HandleDeleteLinks(c *gin.Context) {
 	db := middleware.GetDB(c)
-	slug := c.Query("alias")
-	urlStr := c.Query("url")
+	slug := c.PostForm("slug")
+	urlStr := c.PostForm("url")
 
 	user := auth.GetAuthenticatedUser(c)
 	if user == nil {
@@ -587,8 +583,7 @@ func HandleGetLinks(c *gin.Context) {
 }
 
 func HandleCopySignal(c *gin.Context) {
-	url := c.Query("copied")
-	log.WithField("url", url).Info("Copied")
+	url := c.PostForm("copy")
 
 	submatches := tinyUrlRegexp.FindStringSubmatch(url)
 	if len(submatches) < 2 {

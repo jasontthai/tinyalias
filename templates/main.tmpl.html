@@ -118,7 +118,9 @@
             console.log(e);
 
             $.ajax( {
-                url: '/signal?copied=' + copyBtn.getAttribute("data-clipboard-text")
+                type: "post",
+                url: '/signal',
+                data: 'copy='+ copyBtn.getAttribute("data-clipboard-text")
             });
         });
         clipboard.on('error', function(e) {

@@ -89,14 +89,16 @@
                     console.log(e);
                     $('#copied-' + index).html(' Copied!');
 
-                    $.ajax( {
-                        url: '/signal?copied=' + data.short
+                    $.ajax({
+                        type: "post",
+                        url: '/signal',
+                        data: 'copy=' + data.short
                     });
                 });
                 clipboard.on('error', function(e) {
                     console.log(e);
                 });
-            })
+            });
         })
     });
 </script>
