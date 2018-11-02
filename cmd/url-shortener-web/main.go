@@ -104,7 +104,6 @@ func main() {
 	router.POST("/login", auth.Login)
 	router.POST("/register", auth.Register)
 	router.POST("/update-password", auth.UpdatePassword)
-	router.POST("/create", url.HandleCreateLink)
 	router.POST("/del", url.HandleDeleteLinks)
 	router.POST("/get", url.HandleGetLinks)
 	router.POST("/signal", url.HandleCopySignal)

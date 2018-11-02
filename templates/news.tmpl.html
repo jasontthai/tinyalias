@@ -77,8 +77,7 @@
             var url = $(this).data('url');
             //Make ajax call for current form
             $.ajax({
-                type: 'post',
-                url: '/create',
+                url: '{{ .APIUrl }}/create',
                 data: "url=" + encodeURIComponent(url),
                 success: function (data) {
                     $('#href-' + index).html(data.short);

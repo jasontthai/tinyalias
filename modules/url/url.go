@@ -446,9 +446,24 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	slug := c.Param("slug")
 	var handled bool = true
 
-	if strings.Contains(c.Request.Host, "api") {
+	hostname := strings.Split(c.Request.Host, ".")
+
+	if hostname[0] == "api" {
 		if slug == "create" {
 			APICreateURL(c)
+		} else if slug == "status" {
+			db := middleware.GetDB(c)
+			err := db.Ping()
+			if err != nil {
+				c.Error(err)
+				c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{
+					"status": "NOT OK",
+				})
+				return true
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"status": "OK",
+			})
 		} else {
 			c.JSON(http.StatusNotFound, gin.H{
 				"success": false,
