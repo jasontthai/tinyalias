@@ -102,10 +102,12 @@ func CreateURL(c *gin.Context) {
 		}
 	}
 
-	shortened, err := createURL(c, url, slug, password, expirationTime, mindful == "true")
+	shortened, status, err := createURL(c, url, slug, password, expirationTime, mindful == "true")
 	if err != nil {
-		c.Error(err)
-		utils.HandleHtmlResponse(c, http.StatusInternalServerError, "main.tmpl.html", gin.H{
+		if status == http.StatusInternalServerError {
+			c.Error(err)
+		}
+		utils.HandleHtmlResponse(c, status, "main.tmpl.html", gin.H{
 			"error":    fmt.Errorf("Something went wrong: %v", err.Error()),
 			"original": url,
 		})
@@ -224,10 +226,12 @@ func APICreateURL(c *gin.Context) {
 		expiration = time.Unix(i, 0)
 	}
 
-	shortened, err := createURL(c, url, slug, password, expiration, mindful == "true")
+	shortened, status, err := createURL(c, url, slug, password, expiration, mindful == "true")
 	if err != nil {
-		c.Error(err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+		if status == http.StatusInternalServerError {
+			c.Error(err)
+		}
+		c.AbortWithStatusJSON(status, gin.H{
 			"success": false,
 			"error":   err.Error(),
 		})
@@ -355,13 +359,13 @@ func APIGetURLs(c *gin.Context) {
 	})
 }
 
-func createURL(c *gin.Context, url, slug, password string, expiration time.Time, mindful bool) (string, error) {
+func createURL(c *gin.Context, url, slug, password string, expiration time.Time, mindful bool) (string, int, error) {
 	db := middleware.GetDB(c)
 	_, qc := middleware.GetQue(c)
 
 	var shortened string
 	if url == "" {
-		return shortened, nil
+		return shortened, http.StatusOK, nil
 	}
 
 	// URL sanitization
@@ -380,16 +384,16 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 			c.Error(err)
 		}
 		if domain != nil && domain.Blacklist {
-			return "", fmt.Errorf("You are blacklisted.")
+			return "", http.StatusBadRequest, fmt.Errorf("You are blacklisted.")
 		}
 	}
 
 	urlObj, err := pg.GetURL(db, url, slug)
 	if err != nil && err != sql.ErrNoRows {
-		return "", err
+		return "", http.StatusInternalServerError, err
 	}
 	if urlObj != nil {
-		return utils.BaseUrl + urlObj.Slug, nil
+		return utils.BaseUrl + urlObj.Slug, http.StatusOK, nil
 	}
 
 	if slug == "" {
@@ -412,7 +416,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 	if password != "" {
 		urlObj.Password, err = models.TransformPassword(password)
 		if err != nil {
-			return "", err
+			return "", http.StatusInternalServerError, err
 		}
 	}
 	if !expiration.Equal(time.Time{}) {
@@ -427,7 +431,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 	// Run spam job on new link
 	err = pg.CreateURL(db, urlObj)
 	if err != nil {
-		return "", err
+		return "", http.StatusInternalServerError, err
 	}
 	shortened = utils.BaseUrl + urlObj.Slug
 
@@ -442,7 +446,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		"short":    shortened,
 		"original": url,
 	}).Info("Shortened URL generated")
-	return shortened, nil
+	return shortened, http.StatusOK, nil
 }
 
 func handleSpecialRoutes(c *gin.Context) bool {
