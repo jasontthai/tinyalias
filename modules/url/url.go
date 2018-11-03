@@ -2,7 +2,6 @@ package url
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
 	url2 "net/url"
@@ -40,8 +39,6 @@ const (
 	ThreatQuery      = "threat"
 	SlugQuery        = "slug"
 	XForwardedHeader = "X-Forwarded-For"
-	DefaultLimit     = 20
-	DefaultOffset    = 0
 )
 
 type APIResponse struct {
@@ -330,7 +327,7 @@ func APIGetURLs(c *gin.Context) {
 		return
 	}
 
-	limit, offset, err := GetLimitAndOffsetQueries(c)
+	limit, offset, err := utils.GetLimitAndOffsetQueries(c)
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -453,9 +450,24 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	slug := c.Param("slug")
 	var handled bool = true
 
-	if strings.Contains(c.Request.Host, "api") {
+	hostname := strings.Split(c.Request.Host, ".")
+
+	if hostname[0] == "api" {
 		if slug == "create" {
 			APICreateURL(c)
+		} else if slug == "status" {
+			db := middleware.GetDB(c)
+			err := db.Ping()
+			if err != nil {
+				c.Error(err)
+				c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{
+					"status": "NOT OK",
+				})
+				return true
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"status": "OK",
+			})
 		} else {
 			c.JSON(http.StatusNotFound, gin.H{
 				"success": false,
@@ -464,14 +476,6 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		return true
 	}
 	switch slug {
-	case "signal":
-		HandleCopySignal(c)
-	case "create":
-		APICreateURL(c)
-	case "get":
-		HandleGetLinks(c)
-	case "del":
-		HandleDeleteLinks(c)
 	case "shorten":
 		CreateURL(c)
 	case "favicon.ico":
@@ -496,10 +500,55 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	return handled
 }
 
+func HandleCreateLink(c *gin.Context) {
+	url := c.PostForm("url")
+	slug := c.PostForm("alias")
+	password := c.PostForm("password")
+	expired := c.PostForm("expiration")
+	mindful := c.PostForm("mindful")
+
+	var expiration time.Time
+	if expired != "" {
+		i, err := strconv.ParseInt(expired, 10, 64)
+		if err != nil {
+			c.Error(err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"error":   "Failed to parse expiration. Expiration must be unix timestamp",
+			})
+			return
+		}
+		expiration = time.Unix(i, 0)
+	}
+
+	shortened, err := createURL(c, url, slug, password, expiration, mindful == "true")
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	res := APIResponse{
+		Success:  true,
+		Password: password,
+		Short:    shortened,
+		Original: url,
+	}
+	if !expiration.Equal(time.Time{}) {
+		res.Expiration = expiration.Unix()
+	}
+
+	c.JSON(http.StatusOK, res)
+	return
+}
+
 func HandleDeleteLinks(c *gin.Context) {
 	db := middleware.GetDB(c)
-	slug := c.Query("alias")
-	urlStr := c.Query("url")
+	slug := c.PostForm("slug")
+	urlStr := c.PostForm("url")
 
 	user := auth.GetAuthenticatedUser(c)
 	if user == nil {
@@ -540,6 +589,10 @@ func HandleDeleteLinks(c *gin.Context) {
 		return
 	}
 
+	log.WithField("slug", slug).
+		WithField("url", urlStr).
+		Info("Deleted URL")
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 	})
@@ -555,7 +608,8 @@ func HandleGetLinks(c *gin.Context) {
 		})
 	}
 
-	limit, offset, err := GetLimitAndOffsetQueries(c)
+	limit, offset, err := utils.DataTableGetStartAndLengthQueries(c)
+	logEntry := log.WithField("limit", limit).WithField("offset", offset)
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -565,13 +619,46 @@ func HandleGetLinks(c *gin.Context) {
 		return
 	}
 
+	var orderByStr string
+	if c.PostForm("order[0][column]") != "" && c.PostForm("order[0][dir]") != "" {
+		sortColumnStr := c.PostForm("order[0][column]")
+		columnName := c.PostForm(fmt.Sprintf("columns[%v][data]", sortColumnStr))
+		orderStr := c.PostForm("order[0][dir]")
+		orderByStr = fmt.Sprintf("%v %v", columnName, orderStr)
+
+		logEntry = logEntry.WithField("order_by", orderByStr)
+	}
+	logEntry.Info("table get")
+
+	drawStr := c.PostForm("draw")
+	draw, err := strconv.ParseInt(drawStr, 10, 32)
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	searchStr := c.PostForm("search[value]")
+	if searchStr != "" {
+		// TODO only search for searchable column
+		searchStr = fmt.Sprintf(`%%%v%%`, searchStr)
+	}
+
 	clauses := make(map[string]interface{})
+	countClauses := make(map[string]interface{})
+
 	clauses["_limit"] = limit
 	clauses["_offset"] = offset
+	clauses["_order_by"] = orderByStr
+	clauses["_like"] = searchStr
 
 	// allow admin to query for all urls
 	if user.Role != models.RoleAdmin {
 		clauses["username"] = user.Username
+		countClauses["username"] = user.Username
 	}
 	urls, err := pg.GetURLs(db, clauses)
 	if err != nil {
@@ -583,16 +670,40 @@ func HandleGetLinks(c *gin.Context) {
 		return
 	}
 
+	totalCount, err := pg.GetURLCount(db, countClauses)
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	//filtered count
+	countClauses["_like"] = searchStr
+	filteredCount, err := pg.GetURLCount(db, countClauses)
+	if err != nil {
+		c.Error(err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"data":    urls,
+		"success":         true,
+		"data":            urls,
+		"draw":            draw,
+		"recordsTotal":    totalCount,
+		"recordsFiltered": filteredCount,
 	})
 	return
 }
 
 func HandleCopySignal(c *gin.Context) {
-	url := c.Query("copied")
-	log.WithField("url", url).Info("Copied")
+	url := c.PostForm("copy")
 
 	submatches := tinyUrlRegexp.FindStringSubmatch(url)
 	if len(submatches) < 2 {
@@ -717,30 +828,4 @@ func GetAnalytics(c *gin.Context) {
 		"count":     count,
 	})
 	return
-}
-
-func GetLimitAndOffsetQueries(c *gin.Context) (limit, offset uint64, err error) {
-	offsetStr := c.Query("offset")
-	if offsetStr != "" {
-		offset, err = strconv.ParseUint(offsetStr, 10, 32)
-		if err != nil {
-			return 0, 0, err
-		}
-	} else {
-		offset = DefaultOffset
-	}
-
-	limitStr := c.Query("limit")
-	if limitStr != "" {
-		limit, err = strconv.ParseUint(limitStr, 10, 32)
-		if err != nil {
-			return 0, 0, err
-		}
-	} else {
-		limit = DefaultLimit
-	}
-	if limit > 100 {
-		return 0, 0, errors.New("limit must be <= 100")
-	}
-	return limit, offset, err
 }

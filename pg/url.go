@@ -45,7 +45,7 @@ func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
 func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	sb := psql.Select("*").
-		From("urls").OrderBy("created desc")
+		From("urls")
 
 	if slug, ok := clauses["slug"].(string); ok {
 		sb = sb.Where(squirrel.Eq{"slug": slug})
@@ -69,6 +69,17 @@ func GetURLs(db *sqlx.DB, clauses map[string]interface{}) ([]models.URL, error) 
 
 	if offset, ok := clauses["_offset"].(uint64); ok {
 		sb = sb.Offset(offset)
+	}
+
+	// search field
+	if like, ok := clauses["_like"].(string); ok && like != "" {
+		sb = sb.Where(fmt.Sprintf("(slug ilike '%v' OR url ilike '%v' OR username ilike '%v')", like, like, like))
+	}
+
+	if orderBy, ok := clauses["_order_by"].(string); ok && orderBy != "" {
+		sb = sb.OrderBy(orderBy)
+	} else {
+		sb = sb.OrderBy("created desc")
 	}
 
 	sqlStr, args, err := sb.ToSql()
@@ -113,6 +124,11 @@ func GetURLCount(db *sqlx.DB, clauses map[string]interface{}) (int, error) {
 
 	if username, ok := clauses["username"].(string); ok {
 		sb = sb.Where(squirrel.Eq{"username": username})
+	}
+
+	// search field
+	if like, ok := clauses["_like"].(string); ok && like != "" {
+		sb = sb.Where(fmt.Sprintf("(slug ilike '%v' OR url ilike '%v' OR username ilike '%v')", like, like, like))
 	}
 
 	sqlStr, args, err := sb.ToSql()

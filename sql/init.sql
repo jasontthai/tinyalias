@@ -66,3 +66,5 @@ CREATE TABLE IF NOT EXISTS users (
 
 ALTER TABLE urls
   ADD COLUMN username text NOT NULL DEFAULT '';
+
+CREATE INDEX idx_username ON urls USING btree (username);

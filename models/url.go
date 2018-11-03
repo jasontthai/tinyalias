@@ -27,7 +27,7 @@ type URL struct {
 	Password string    `json:"-" db:"password"`
 	Expired  null.Time `json:"expired" db:"expired"`
 	Mindful  bool      `json:"mindful" db:"mindful"`
-	Username string    `json:"username" db:"username"'`
+	Username string    `json:"username" db:"username"`
 }
 
 func TransformPassword(val string) (string, error) {
