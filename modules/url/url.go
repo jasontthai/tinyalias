@@ -500,51 +500,6 @@ func handleSpecialRoutes(c *gin.Context) bool {
 	return handled
 }
 
-func HandleCreateLink(c *gin.Context) {
-	url := c.PostForm("url")
-	slug := c.PostForm("alias")
-	password := c.PostForm("password")
-	expired := c.PostForm("expiration")
-	mindful := c.PostForm("mindful")
-
-	var expiration time.Time
-	if expired != "" {
-		i, err := strconv.ParseInt(expired, 10, 64)
-		if err != nil {
-			c.Error(err)
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"error":   "Failed to parse expiration. Expiration must be unix timestamp",
-			})
-			return
-		}
-		expiration = time.Unix(i, 0)
-	}
-
-	shortened, err := createURL(c, url, slug, password, expiration, mindful == "true")
-	if err != nil {
-		c.Error(err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	res := APIResponse{
-		Success:  true,
-		Password: password,
-		Short:    shortened,
-		Original: url,
-	}
-	if !expiration.Equal(time.Time{}) {
-		res.Expiration = expiration.Unix()
-	}
-
-	c.JSON(http.StatusOK, res)
-	return
-}
-
 func HandleDeleteLinks(c *gin.Context) {
 	db := middleware.GetDB(c)
 	slug := c.PostForm("slug")
