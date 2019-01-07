@@ -111,6 +111,7 @@ func RunDetectSpamJob(j *que.Job) error {
 
 		threats, err := sb.LookupURLs(urlStr)
 		if err != nil {
+			log.WithError(err).Error("Error looking up urls")
 			return err
 		}
 
