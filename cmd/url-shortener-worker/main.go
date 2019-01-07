@@ -81,7 +81,7 @@ func RunDetectSpamJob(j *que.Job) error {
 
 	log.Info("Run spam job on: ", request.URL)
 
-	limit := uint64(500)
+	limit := uint64(20)
 	offset := uint64(0)
 	for ; ; offset += limit {
 
