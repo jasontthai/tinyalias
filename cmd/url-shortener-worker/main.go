@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -41,32 +42,34 @@ func RunParseGeoRequestJob(j *que.Job) error {
 
 	log.WithField("ParseGeoRequest", request).Info("Processing ParseGeoRequest!")
 
-	ip := net.ParseIP(request.IP)
-	slug := request.Slug
-	record, err := reader.City(ip)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"ip":   ip,
-			"slug": slug,
-		}).WithError(err).Error("Error Getting Geo Info")
-	}
+	ips := strings.Split(request.IP, ",")
+	for _, ip := range ips {
+		slug := request.Slug
+		record, err := reader.City(net.ParseIP(ip))
+		if err != nil {
+			log.WithFields(log.Fields{
+				"ip":   ip,
+				"slug": slug,
+			}).WithError(err).Error("Error Getting Geo Info")
+		}
 
-	var state string
-	if len(record.Subdivisions) != 0 {
-		state = record.Subdivisions[0].Names["en"]
-	}
+		var state string
+		if len(record.Subdivisions) != 0 {
+			state = record.Subdivisions[0].Names["en"]
+		}
 
-	if err = pg.UpsertURLStat(db, &models.URLStat{
-		Slug:    slug,
-		Country: record.Country.Names["en"],
-		State:   state,
-		Counter: 1,
-		Created: time.Now(),
-	}); err != nil {
-		log.WithFields(log.Fields{
-			"ip":   ip,
-			"slug": slug,
-		}).WithError(err).Error("Error Saving Geo Info")
+		if err = pg.UpsertURLStat(db, &models.URLStat{
+			Slug:    slug,
+			Country: record.Country.Names["en"],
+			State:   state,
+			Counter: 1,
+			Created: time.Now(),
+		}); err != nil {
+			log.WithFields(log.Fields{
+				"ip":   ip,
+				"slug": slug,
+			}).WithError(err).Error("Error Saving Geo Info")
+		}
 	}
 
 	return nil
