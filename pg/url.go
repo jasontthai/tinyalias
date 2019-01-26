@@ -10,16 +10,10 @@ import (
 	"github.com/zirius/tinyalias/models"
 )
 
-func GetURL(db *sqlx.DB, longUrl, slug string) (*models.URL, error) {
+func GetURL(db *sqlx.DB, slug string) (*models.URL, error) {
 	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 	sb := psql.Select("*").
-		From("urls")
-	if longUrl != "" {
-		sb = sb.Where(squirrel.Eq{"url": longUrl})
-	}
-	if slug != "" {
-		sb = sb.Where(squirrel.Eq{"slug": slug})
-	}
+		From("urls").Where(squirrel.Eq{"slug": slug})
 
 	sqlStr, args, err := sb.ToSql()
 	if err != nil {

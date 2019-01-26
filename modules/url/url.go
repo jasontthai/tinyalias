@@ -130,7 +130,7 @@ func Get(c *gin.Context) {
 		"slug": slug,
 	}).Debug("Got SLUG")
 
-	urlObj, err := pg.GetURL(db, "", slug)
+	urlObj, err := pg.GetURL(db, slug)
 	if err != nil && err != sql.ErrNoRows {
 		c.Error(err)
 	}
@@ -249,74 +249,6 @@ func APICreateURL(c *gin.Context) {
 	return
 }
 
-func APIGetURL(c *gin.Context) {
-	db := middleware.GetDB(c)
-	submatches := tinyUrlRegexp.FindStringSubmatch(c.Query("url"))
-	if len(submatches) < 2 {
-		c.JSON(http.StatusOK, APIResponse{
-			Success: true,
-		})
-		return
-	}
-	slug := submatches[1]
-	url, err := pg.GetURL(db, "", slug)
-	if err != nil {
-		if err != sql.ErrNoRows {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-				"error":   err.Error(),
-			})
-			return
-		}
-		c.JSON(http.StatusOK, APIResponse{
-			Success: true,
-		})
-		return
-	}
-
-	if url.Status == "expired" || (url.Expired.Valid && url.Expired.Time.Before(time.Now())) {
-		c.JSON(http.StatusOK, APIResponse{
-			Success: true,
-			Message: "link expired",
-		})
-		return
-	}
-
-	// return spammed
-	if url.Status != models.Active && url.Status != models.Pending {
-		c.JSON(http.StatusOK, APIResponse{
-			Success: true,
-			Message: url.Status,
-		})
-		return
-	}
-
-	if url.Password != "" {
-		if c.Query("password") != "" {
-			err = models.VerifyPassword(url.Password, c.Query("password"))
-			if err != nil {
-				c.JSON(http.StatusBadRequest, APIResponse{
-					Success: false,
-					Error:   "invalid password",
-				})
-				return
-			}
-		} else {
-			c.JSON(http.StatusBadRequest, APIResponse{
-				Success: false,
-				Error:   "password is required",
-			})
-			return
-		}
-	}
-
-	c.JSON(http.StatusOK, APIResponse{
-		Short:    submatches[0],
-		Original: url.Url,
-	})
-	return
-}
-
 func APIGetURLs(c *gin.Context) {
 	db := middleware.GetDB(c)
 
@@ -385,12 +317,16 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		}
 	}
 
-	urlObj, err := pg.GetURL(db, url, slug)
+	urlObj, err := pg.GetURL(db, slug)
 	if err != nil && err != sql.ErrNoRows {
 		return "", http.StatusInternalServerError, err
 	}
 	if urlObj != nil {
-		return utils.BaseUrl + urlObj.Slug, http.StatusOK, nil
+		if urlObj.Url == url {
+			return utils.BaseUrl + urlObj.Slug, http.StatusOK, nil
+		}
+		// url already exists with this slug, generate a new slug
+		slug = ""
 	}
 
 	if slug == "" {
@@ -513,7 +449,7 @@ func HandleDeleteLinks(c *gin.Context) {
 		return
 	}
 
-	url, err := pg.GetURL(db, urlStr, slug)
+	url, err := pg.GetURL(db, slug)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.AbortWithStatusJSON(http.StatusOK, gin.H{
@@ -671,7 +607,7 @@ func HandleCopySignal(c *gin.Context) {
 	slug := submatches[1]
 
 	db := middleware.GetDB(c)
-	urlObj, err := pg.GetURL(db, "", slug)
+	urlObj, err := pg.GetURL(db, slug)
 	if err != nil {
 		c.Error(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{

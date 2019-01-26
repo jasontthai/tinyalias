@@ -30,7 +30,7 @@ func TestURL(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Test GetURL
-	returnedUrl, err := GetURL(db, url.Url, "")
+	returnedUrl, err := GetURL(db, slug)
 	assert.Nil(t, err)
 	assert.Equal(t, url.Url, returnedUrl.Url)
 
