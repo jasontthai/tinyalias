@@ -306,6 +306,7 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 	parseURL, err := url2.Parse(url)
 	if err != nil {
 		c.Error(err)
+		return "", http.StatusBadRequest, fmt.Errorf("Invalid URL")
 	}
 	if parseURL != nil {
 		domain, err := pg.GetDomain(db, strings.ToLower(parseURL.Hostname()))
