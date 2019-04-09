@@ -136,6 +136,12 @@ func RunDetectSpamJob(j *que.Job) error {
 func RunExpirationJob(j *que.Job) error {
 	log.Info("Running Expiration Job")
 	_, err := db.Exec("UPDATE urls SET status = 'expired' WHERE expired IS NOT NULL AND expired < NOW()")
+	if err != nil {
+		return err
+	}
+
+	log.Info("Running Delete Job")
+	_, err = db.Exec("DELETE from urls WHERE created < CURRENT_DATE - interval '3' day")
 	return err
 }
 
