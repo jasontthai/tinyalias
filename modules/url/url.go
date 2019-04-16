@@ -302,6 +302,9 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 		return "", http.StatusBadRequest, fmt.Errorf("Cannot shorten an email")
 	}
 
+	if ok := govalidator.IsURL(url); !ok {
+		return "", http.StatusBadRequest, fmt.Errorf("Invalid URL")
+	}
 
 	// URL sanitization
 	url = strings.TrimSpace(url)
