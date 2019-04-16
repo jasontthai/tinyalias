@@ -177,6 +177,7 @@ func main() {
 
 	sb, err = safebrowsing.NewSafeBrowser(safebrowsing.Config{
 		APIKey: os.Getenv("GOOGLE_API_KEY"),
+		DBPath: "safebrowsing_db",
 	})
 	if err != nil {
 		log.Fatal("error initializing safe browser client")
