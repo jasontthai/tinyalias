@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
@@ -296,6 +297,11 @@ func createURL(c *gin.Context, url, slug, password string, expiration time.Time,
 	if url == "" {
 		return shortened, http.StatusOK, nil
 	}
+
+	if ok := govalidator.IsEmail(url); ok {
+		return "", http.StatusBadRequest, fmt.Errorf("Cannot shorten an email")
+	}
+
 
 	// URL sanitization
 	url = strings.TrimSpace(url)
