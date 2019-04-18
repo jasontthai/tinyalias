@@ -140,9 +140,9 @@ func RunExpirationJob(j *que.Job) error {
 		return err
 	}
 
-	log.Info("Running Delete Job")
-	_, err = db.Exec("DELETE from urls WHERE created < CURRENT_DATE - interval '3' day")
-	return err
+	//log.Info("Running Delete Job")
+	//_, err = db.Exec("DELETE from urls WHERE created < CURRENT_DATE - interval '3' day")
+	//return err
 }
 
 func RunRemovePendingJob(j *que.Job) error {
