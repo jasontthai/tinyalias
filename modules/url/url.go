@@ -428,6 +428,8 @@ func handleSpecialRoutes(c *gin.Context) bool {
 		c.File("./static/favicon.ico")
 	case "robots.txt":
 		c.File("./static/robots.txt")
+	case "wakemydyno.txt":
+		c.String(http.StatusOK, "OK")
 	case "analytics":
 		GetAnalytics(c)
 	case "privacy-policy":
