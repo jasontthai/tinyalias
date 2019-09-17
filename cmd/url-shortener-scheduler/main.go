@@ -40,7 +40,7 @@ func main() {
 	//	channel <- true
 	//}()
 
-	queue.DispatchDetectSpamJob(qc, "")
+	// queue.DispatchDetectSpamJob(qc, "")
 	queue.DispatchExpirationJob(qc)
 	queue.DispatchRemovePendingJob(qc)
 
