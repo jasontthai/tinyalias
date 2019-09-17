@@ -1,8 +1,6 @@
 
 # TinyAlias
 
-[![CircleCI](https://circleci.com/gh/zirius/tinyalias.svg?style=svg)](https://circleci.com/gh/zirius/tinyalias)
-
 A url shortener Go app, which can easily be deployed to Heroku/Dokku/Flynn.
 
 Powers [https://tinyalias.com](https://tinyalias.com)
