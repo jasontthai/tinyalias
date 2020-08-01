@@ -4,8 +4,8 @@ import (
 	"os"
 
 	_ "github.com/heroku/x/hmetrics/onload"
-	log "github.com/sirupsen/logrus"
 	"github.com/jasontthai/tinyalias/modules/queue"
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {

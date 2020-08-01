@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="en">
-{{template "header.tmpl.html" . }}
+{{ template "header.tmpl.html" . }}
 <body class="bg-dark">
 <nav class="navbar navbar-expand-sm navbar-dark py-5">
     <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
         <a class="navbar-brand mb-0 h1" href="/">TinyAlias</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -34,39 +35,40 @@
             <div class="input-group-prepend justify-content-center">
                 <span class="input-group-text" id="longURLHelp">URL</span>
             </div>
-            <input type="text" class="form-control" name="url" placeholder="Enter your tinyalias url" aria-label="url" aria-describedby="longURLHelp">
+            <input type="text" class="form-control" name="url" placeholder="Enter your tinyalias url" aria-label="url"
+                   aria-describedby="longURLHelp">
             <div class="input-group-append justify-content-center">
                 <button type="submit" class="btn btn-info">Get Stats</button>
             </div>
         </div>
     </form>
-{{ if .url }}
+    {{ if .url }}
     <h2 class="text-center">Stats for {{ .url }}</h2>
     <h3>Number of clicks: {{ .clicks }}</h3>
-{{ end }}
-{{ if .analytics }}
+    {{ end }}
+    {{ if .analytics }}
     <h3>Visits by Countries</h3>
     <ul class="list-group">
-    {{ range .analytics}}
+        {{ range .analytics }}
         <li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center">
-        {{ .Country }}, {{ .State }}
+            {{ .Country }}, {{ .State }}
             <span class="badge badge-dark badge-pill">{{ .Count }}</span>
         </li>
-    {{ end }}
+        {{ end }}
     </ul>
-{{ end }}
-{{ if .error }}
+    {{ end }}
+    {{ if .error }}
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    {{ .error }}
+        {{ .error }}
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
-{{ end }}
+    {{ end }}
     <span><a href="/">Create Another Link Here</a></span>
 
-{{ if .user }}
-    <h2  class="pt-5">Links You Created</h2>
+    {{ if .user }}
+    <h2 class="pt-5">Links You Created</h2>
     <div class="table-responsive table-hover">
         <table class="table" id="thetable">
             <thead>
@@ -82,10 +84,10 @@
             </tbody>
         </table>
     </div>
-{{ end }}
+    {{ end }}
 </div>
 </body>
-{{template "footer.tmpl.html" . }}
+{{ template "footer.tmpl.html" . }}
 <script>
 
     function del(idx, slug, url) {
@@ -94,13 +96,13 @@
             url: "/del",
             data: 'slug=' + encodeURIComponent(slug) + '&url=' + encodeURIComponent(url),
             success: function (data) {
-                $('#thetable').DataTable().row('#therow-'+idx).remove().draw();
+                $('#thetable').DataTable().row('#therow-' + idx).remove().draw();
             }
         })
     };
 
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         var t = $('#thetable').DataTable({
             "processing": true,
             "serverSide": true,
@@ -112,13 +114,13 @@
                 },
                 {
                     'targets': 2,
-                    'createdCell':  function (td, cellData, rowData, row, col) {
+                    'createdCell': function (td, cellData, rowData, row, col) {
                         $(td).attr('style', 'word-wrap: break-word;max-width: 200px; text-overflow: ellipsis; overflow:hidden; white-space: nowrap;');
                     }
                 },
                 {
                     'targets': 3,
-                    'createdCell':  function (td, cellData, rowData, row, col) {
+                    'createdCell': function (td, cellData, rowData, row, col) {
                         $(td).attr('style', 'word-wrap: break-word;max-width: 400px; text-overflow: ellipsis; overflow:hidden; white-space: nowrap;');
                     }
                 },
@@ -132,43 +134,43 @@
             "ajax": {
                 type: 'post',
                 url: '/get',
-                "dataSrc": function(json) {
+                "dataSrc": function (json) {
                     var return_data = [];
 
                     if (json.data == undefined) {
                         return return_data;
                     }
 
-                    for(var i=0;i< json.data.length; i++){
-                        var idx = i+1;
+                    for (var i = 0; i < json.data.length; i++) {
+                        var idx = i + 1;
                         return_data.push({
-                            "DT_RowId": "therow-"+ idx,
-                            "idx": "" , //will be updated later
+                            "DT_RowId": "therow-" + idx,
+                            "idx": "", //will be updated later
                             "counter": json.data[i].counter,
-                            "slug": '<a href="' + {{ .baseUrl }} + json.data[i].slug +'">' + {{ .baseUrl }} + json.data[i].slug +'</a>',
-                            "url"  : '<a href="' + json.data[i].url +'">' + json.data[i].url +'</a>',
-                            "manage" : '<a data-toggle="tooltip" data-placement="right" data-original-title="Delete" href="#/" onClick="del(\'' + idx +'\',\'' + json.data[i].slug + '\',\'' + json.data[i].url + '\');"><i class="fa fa-trash" aria-hidden="true"></i></a>'
+                            "slug": '<a href="' + {{ .baseUrl }} +json.data[i].slug + '">' + {{ .baseUrl }} +json.data[i].slug + '</a>',
+                            "url": '<a href="' + json.data[i].url + '">' + json.data[i].url + '</a>',
+                            "manage": '<a data-toggle="tooltip" data-placement="right" data-original-title="Delete" href="#/" onClick="del(\'' + idx + '\',\'' + json.data[i].slug + '\',\'' + json.data[i].url + '\');"><i class="fa fa-trash" aria-hidden="true"></i></a>'
                         })
                     }
                     return return_data;
                 }
             },
             "columns": [
-                { "data": "idx" },
-                { "data": "counter"},
-                { "data": "slug"},
-                { "data": "url" },
-                { "data": "manage" }
+                {"data": "idx"},
+                {"data": "counter"},
+                {"data": "slug"},
+                {"data": "url"},
+                {"data": "manage"}
             ]
         });
 
-        t.on( 'draw.dt', function () {
+        t.on('draw.dt', function () {
             var PageInfo = $('#thetable').DataTable().page.info();
-            t.column(0, { page: 'current' }).nodes().each( function (cell, i) {
+            t.column(0, {page: 'current'}).nodes().each(function (cell, i) {
                 cell.innerHTML = i + 1 + PageInfo.start;
-            } );
-        } );
-    } );
+            });
+        });
+    });
 
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()

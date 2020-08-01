@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="en">
-{{template "header.tmpl.html" . }}
+{{ template "header.tmpl.html" . }}
 <body class="bg-dark">
 <nav class="navbar navbar-expand-sm navbar-dark py-5">
     <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
         <a class="navbar-brand mb-0 h1" href="/">TinyAlias</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -31,17 +32,17 @@
     <h5>Or you can go to your link here <a href="{{ .url }}">{{ .url }}</a></h5>
 </div>
 </body>
-{{template "footer.tmpl.html" . }}
-{{template "quotes.tmpl.html" . }}
+{{ template "footer.tmpl.html" . }}
+{{ template "quotes.tmpl.html" . }}
 <script>
     var seconds_left = 10;
     document.getElementById("mindful").innerHTML = "This is a mindful link. Take a moment to breathe and be here and now. You will be directed in " + seconds_left + " seconds";
     $(document).ready(function () {
         setInterval(function () {
             if (seconds_left >= 0) {
-                document.getElementById("mindful").innerHTML = "This is a mindful link. Take a moment to breathe and be here and now. You will be directed in " + --seconds_left +" seconds";
+                document.getElementById("mindful").innerHTML = "This is a mindful link. Take a moment to breathe and be here and now. You will be directed in " + --seconds_left + " seconds";
             }
-        },1000);
+        }, 1000);
         window.setTimeout(function () {
             location.href = {{ .url }};
         }, seconds_left * 1000);

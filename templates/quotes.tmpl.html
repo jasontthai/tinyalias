@@ -5,11 +5,11 @@
     </blockquote>
 </div>
 <script>
-    $.ajax( {
+    $.ajax({
         url: 'https://favqs.com/api/qotd',
-        success: function(data) {
+        success: function (data) {
             $('#quote-author').text(data.quote.author);
-            $('#quote-content').html(`<i>&quot;`+data.quote.body+`&quot;</i>`);
+            $('#quote-content').html(`<i>&quot;` + data.quote.body + `&quot;</i>`);
         },
         cache: false
     });

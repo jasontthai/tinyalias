@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jmoiron/sqlx"
 	"github.com/jasontthai/tinyalias/models"
+	"github.com/jmoiron/sqlx"
 )
 
 func GetUser(db *sqlx.DB, username string) (*models.User, error) {

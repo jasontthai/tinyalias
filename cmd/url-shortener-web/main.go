@@ -9,6 +9,10 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
+	"github.com/jasontthai/tinyalias/middleware"
+	"github.com/jasontthai/tinyalias/modules/auth"
+	"github.com/jasontthai/tinyalias/modules/queue"
+	"github.com/jasontthai/tinyalias/modules/url"
 	_ "github.com/lib/pq"
 	"github.com/newrelic/go-agent"
 	"github.com/newrelic/go-agent/_integrations/nrgin/v1"
@@ -16,10 +20,6 @@ import (
 	"github.com/ulule/limiter"
 	mgin "github.com/ulule/limiter/drivers/middleware/gin"
 	"github.com/ulule/limiter/drivers/store/memory"
-	"github.com/jasontthai/tinyalias/middleware"
-	"github.com/jasontthai/tinyalias/modules/auth"
-	"github.com/jasontthai/tinyalias/modules/queue"
-	"github.com/jasontthai/tinyalias/modules/url"
 )
 
 func init() {

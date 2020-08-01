@@ -15,7 +15,6 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/guregu/null"
-	log "github.com/sirupsen/logrus"
 	"github.com/jasontthai/tinyalias/middleware"
 	"github.com/jasontthai/tinyalias/models"
 	"github.com/jasontthai/tinyalias/modules/auth"
@@ -23,6 +22,7 @@ import (
 	"github.com/jasontthai/tinyalias/modules/queue"
 	"github.com/jasontthai/tinyalias/modules/utils"
 	"github.com/jasontthai/tinyalias/pg"
+	log "github.com/sirupsen/logrus"
 )
 
 var secret string

@@ -3,8 +3,8 @@ package pg
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/jasontthai/tinyalias/models"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestURLStat(t *testing.T) {

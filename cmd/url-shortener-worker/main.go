@@ -12,14 +12,14 @@ import (
 	"github.com/bgentry/que-go"
 	"github.com/google/safebrowsing"
 	_ "github.com/heroku/x/hmetrics/onload"
+	"github.com/jasontthai/tinyalias/models"
+	"github.com/jasontthai/tinyalias/modules/queue"
+	"github.com/jasontthai/tinyalias/pg"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/jasontthai/tinyalias/models"
-	"github.com/jasontthai/tinyalias/modules/queue"
-	"github.com/jasontthai/tinyalias/pg"
 )
 
 var (

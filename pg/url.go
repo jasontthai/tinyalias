@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jmoiron/sqlx"
 	"github.com/jasontthai/tinyalias/models"
+	"github.com/jmoiron/sqlx"
 )
 
 func GetURL(db *sqlx.DB, slug string) (*models.URL, error) {

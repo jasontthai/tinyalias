@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jasontthai/tinyalias/middleware"
+	"github.com/jasontthai/tinyalias/modules/queue"
 	_ "github.com/lib/pq"
 	"github.com/ulule/limiter"
 	mgin "github.com/ulule/limiter/drivers/middleware/gin"
 	"github.com/ulule/limiter/drivers/store/memory"
-	"github.com/jasontthai/tinyalias/middleware"
-	"github.com/jasontthai/tinyalias/modules/queue"
 )
 
 func GetTestPgURL() string {

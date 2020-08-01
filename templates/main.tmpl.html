@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="en">
-{{template "header.tmpl.html" . }}
+{{ template "header.tmpl.html" . }}
 <body class="bg-dark">
 <nav class="navbar navbar-expand-sm navbar-dark py-5">
     <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
         <a class="navbar-brand mb-0 h1" href="/">TinyAlias</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -29,26 +30,29 @@
 
 <div class="container pt-5">
     <form method="GET" action="shorten">
-{{/*        <div class="pb-3" style="word-wrap: break-word; color: #e9831a"> Links will be automatically removed after 3 days. </div>*/}}
+        {{/*        <div class="pb-3" style="word-wrap: break-word; color: #e9831a"> Links will be automatically removed after 3 days. </div>*/}}
         <div class="input-group input-group-lg pb-3">
             <div class="input-group-prepend justify-content-center">
                 <span class="input-group-text" id="longURLHelp">URL</span>
             </div>
             {{ if .url }}
-                <input style="color: #e9831a; background-color: #e9deda" type="text" class="form-control" name="url" value="{{ .url }}" readonly="readonly" disabled aria-label="url" aria-describedby="longURLHelp">
-                <div class="input-group-append justify-content-center">
-                    <a class="btn btn-info" id="copy-btn" data-clipboard-text={{.url}}>Copy</a>
-                </div>
+            <input style="color: #e9831a; background-color: #e9deda" type="text" class="form-control" name="url"
+                   value="{{ .url }}" readonly="readonly" disabled aria-label="url" aria-describedby="longURLHelp">
+            <div class="input-group-append justify-content-center">
+                <a class="btn btn-info" id="copy-btn" data-clipboard-text={{.url}}>Copy</a>
+            </div>
             {{ else }}
-                <input type="text" class="form-control" name="url" placeholder="Enter url" aria-label="url" aria-describedby="longURLHelp">
-                <div class="input-group-append justify-content-center">
-                    <button type="submit" class="btn btn-info">Shorten</button>
-                </div>
+            <input type="text" class="form-control" name="url" placeholder="Enter url" aria-label="url"
+                   aria-describedby="longURLHelp">
+            <div class="input-group-append justify-content-center">
+                <button type="submit" class="btn btn-info">Shorten</button>
+            </div>
             {{ end }}
         </div>
         {{ if .original }}
-            <div class="pb-3" style="word-wrap: break-word"> Original link: <a href="{{ .original }}" >{{ .original }}</a></div>
-        {{end}}
+        <div class="pb-3" style="word-wrap: break-word"> Original link: <a href="{{ .original }}">{{ .original }}</a>
+        </div>
+        {{ end }}
         <div id="accordion">
             <div id="collapseAlias" class="row collapse show" aria-labelledby="headingOne">
                 <div class="col-auto">
@@ -57,14 +61,17 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon3">{{ .baseUrl }}</span>
                         </div>
-                        <input type="text" class="form-control " name="alias" aria-describedby="basic-addon3" placeholder="Alias (optional)">
+                        <input type="text" class="form-control " name="alias" aria-describedby="basic-addon3"
+                               placeholder="Alias (optional)">
                     </div>
                 </div>
                 <div class="col-auto">
                     <h5>Link Mindfulness</h5>
                     <div class="form-check form-check-inline mb-3">
                         <input class="form-check-input" type="checkbox" id="mindful" name="mindful" value="true">
-                        <label class="form-check-label" for="mindful" data-toggle="tooltip" data-placement="right" data-original-title="User will get a reminder to breathe and wait a few seconds before link redirects">Link Mindfulness</label>
+                        <label class="form-check-label" for="mindful" data-toggle="tooltip" data-placement="right"
+                               data-original-title="User will get a reminder to breathe and wait a few seconds before link redirects">Link
+                            Mindfulness</label>
                     </div>
                 </div>
             </div>
@@ -75,7 +82,8 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon3"><i class="fa fa-key"></i></span>
                         </div>
-                        <input type="password" class="form-control" name="password" aria-describedby="basic-addon3" placeholder="Password (optional)">
+                        <input type="password" class="form-control" name="password" aria-describedby="basic-addon3"
+                               placeholder="Password (optional)">
                     </div>
                 </div>
                 <div class="col-auto">
@@ -84,51 +92,55 @@
                         <div class="input-group-prepend" data-target="#datetimepicker1" data-toggle="datetimepicker">
                             <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                         </div>
-                        <input type="text" id="expiration-id" class="form-control datetimepicker-input" name="expiration" data-toggle="datetimepicker" data-target="#datetimepicker1"/>
+                        <input type="text" id="expiration-id" class="form-control datetimepicker-input"
+                               name="expiration" data-toggle="datetimepicker" data-target="#datetimepicker1"/>
                     </div>
                 </div>
             </div>
 
             <div class="mb-3">
-                <a class="btn btn-info"  href="#" data-toggle="collapse" data-target="#collapseOptions">Other Options</a>
+                <a class="btn btn-info" href="#" data-toggle="collapse" data-target="#collapseOptions">Other Options</a>
             </div>
         </div>
     </form>
-{{ if .error }}
+    {{ if .error }}
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    {{ .error }}
+        {{ .error }}
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
-{{ end }}
+    {{ end }}
     <span><a href="/analytics">Got Links? Get Your Statistics Here</a></span>
     <br/>
-    <span>Use our bookmarklet. Click and drag <a href="javascript:void(open('{{ .baseUrl }}shorten?url='+encodeURIComponent(location.href), 'TinyAlias'))" onmouseover="window.status='';return true" onclick="return false">TinyAlias</a> to your browser's toolbar</span>
+    <span>Use our bookmarklet. Click and drag <a
+            href="javascript:void(open('{{ .baseUrl }}shorten?url='+encodeURIComponent(location.href), 'TinyAlias'))"
+            onmouseover="window.status='';return true"
+            onclick="return false">TinyAlias</a> to your browser's toolbar</span>
 </div>
 </body>
-{{template "footer.tmpl.html" . }}
-{{template "quotes.tmpl.html" . }}
+{{ template "footer.tmpl.html" . }}
+{{ template "quotes.tmpl.html" . }}
 <script>
     var copyBtn = document.getElementById('copy-btn')
     if (copyBtn != null) {
         var clipboard = new ClipboardJS(copyBtn);
 
-        clipboard.on('success', function(e) {
+        clipboard.on('success', function (e) {
             copyBtn.innerHTML = "Copied!"
             console.log(e);
 
-            $.ajax( {
+            $.ajax({
                 type: "post",
                 url: '/signal',
-                data: 'copy='+ copyBtn.getAttribute("data-clipboard-text")
+                data: 'copy=' + copyBtn.getAttribute("data-clipboard-text")
             });
         });
-        clipboard.on('error', function(e) {
+        clipboard.on('error', function (e) {
             console.log(e);
         });
     }
-    $(function() {
+    $(function () {
         $('#datetimepicker1').datetimepicker()
     });
     $(function () {

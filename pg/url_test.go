@@ -3,11 +3,11 @@ package pg
 import (
 	"testing"
 
+	"github.com/jasontthai/tinyalias/models"
+	"github.com/jasontthai/tinyalias/test"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
-	"github.com/jasontthai/tinyalias/models"
-	"github.com/jasontthai/tinyalias/test"
 )
 
 func setup(t *testing.T) *sqlx.DB {

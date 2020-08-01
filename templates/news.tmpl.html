@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="en">
-{{template "header.tmpl.html" . }}
+{{ template "header.tmpl.html" . }}
 <body class="bg-dark">
 <nav class="navbar navbar-expand-sm navbar-dark py-5">
     <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
         <a class="navbar-brand mb-0 h1" href="/">TinyAlias</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -28,14 +29,14 @@
 </nav>
 
 <div class="container">
-{{ if .articles }}
-{{/*
-			<ul class="list-group">
-				*/}}
-{{ range $i, $e := .articles }}
-{{/*
-				<li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center">
-					*/}}
+    {{ if .articles }}
+    {{/*
+            <ul class="list-group">
+            */}}
+    {{ range $i, $e := .articles }}
+    {{/*
+            <li class="list-group-item list-group-item-light d-flex justify-content-between align-items-center">
+            */}}
     <form method="GET" id="form-{{ $i }}" class="forms" data-index="{{ $i }}" data-url="{{ .URL }}">
         <div class="card text-dark my-3">
             <h5 class="card-header"><a href="{{ .URL }}">{{ .Title }}</a></h5>
@@ -49,29 +50,29 @@
             </div>
         </div>
     </form>
-{{/*
-				</li>
-				*/}}
-{{ end }}
-{{/*
-			</ul>
-			*/}}
-{{ end }}
-{{ if .error }}
+    {{/*
+            </li>
+            */}}
+    {{ end }}
+    {{/*
+            </ul>
+            */}}
+    {{ end }}
+    {{ if .error }}
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    {{ .error }}
+        {{ .error }}
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
-{{ end }}
+    {{ end }}
     <span><a href="https://newsapi.org">Powered by NewsAPI.org</a></span>
 </div>
 </body>
-{{template "footer.tmpl.html" . }}
+{{ template "footer.tmpl.html" . }}
 <script>
-    $(document).ready(function(){
-        $('.forms').submit(function(e){
+    $(document).ready(function () {
+        $('.forms').submit(function (e) {
             e.preventDefault(); //Prevent submit
             var index = $(this).data('index');
             var url = $(this).data('url');
@@ -86,9 +87,9 @@
                     $('#copied-' + index).html(' <i class="fa fa-arrow-left"></i> click to copy');
                     $('#submit-' + index).remove();
 
-                    var btn = document.getElementById('href-'+index);
+                    var btn = document.getElementById('href-' + index);
                     var clipboard = new ClipboardJS(btn);
-                    clipboard.on('success', function(e) {
+                    clipboard.on('success', function (e) {
                         console.log(e);
                         $('#copied-' + index).html(' Copied!');
 
@@ -98,7 +99,7 @@
                             data: 'copy=' + data.short
                         });
                     });
-                    clipboard.on('error', function(e) {
+                    clipboard.on('error', function (e) {
                         console.log(e);
                     });
                 }
