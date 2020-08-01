@@ -6,7 +6,7 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	"github.com/zirius/tinyalias/models"
+	"github.com/jasontthai/tinyalias/models"
 )
 
 func GetUser(db *sqlx.DB, username string) (*models.User, error) {

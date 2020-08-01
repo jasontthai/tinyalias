@@ -3,7 +3,7 @@ package pg
 import (
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	"github.com/zirius/tinyalias/models"
+	"github.com/jasontthai/tinyalias/models"
 )
 
 func GetURLStats(db *sqlx.DB, clauses map[string]interface{}) ([]models.URLStat, error) {

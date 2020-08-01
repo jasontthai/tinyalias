@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/zirius/tinyalias/models"
-	"github.com/zirius/tinyalias/test"
+	"github.com/jasontthai/tinyalias/models"
+	"github.com/jasontthai/tinyalias/test"
 )
 
 func TestCreateURL(t *testing.T) {

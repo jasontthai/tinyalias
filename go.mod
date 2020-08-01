@@ -1,4 +1,4 @@
-module github.com/zirius/tinyalias
+module github.com/jasontthai/tinyalias
 
 go 1.14
 

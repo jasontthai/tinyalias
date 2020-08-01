@@ -9,7 +9,7 @@ Powers [https://tinyalias.com](https://tinyalias.com)
 
 This installation guide assume you have already have installed postgres and heroku-cli
 
-* Populate these 2 sql scripts: [init.sql](https://github.com/zirius/tinyalias/blob/master/sql/init.sql) and [schema.sql](https://github.com/bgentry/que-go/blob/master/schema.sql)
+* Populate these 2 sql scripts: [init.sql](https://github.com/jasontthai/tinyalias/blob/master/sql/init.sql) and [schema.sql](https://github.com/bgentry/que-go/blob/master/schema.sql)
 
 * Create .env file in code dir with these values:
   * `DATABASE_URL` : postgres db uri

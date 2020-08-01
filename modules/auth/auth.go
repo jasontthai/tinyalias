@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/zirius/tinyalias/middleware"
-	"github.com/zirius/tinyalias/models"
-	"github.com/zirius/tinyalias/pg"
+	"github.com/jasontthai/tinyalias/middleware"
+	"github.com/jasontthai/tinyalias/models"
+	"github.com/jasontthai/tinyalias/pg"
 )
 
 const SessionName = "My-Session"

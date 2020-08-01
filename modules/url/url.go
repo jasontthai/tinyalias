@@ -16,13 +16,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/guregu/null"
 	log "github.com/sirupsen/logrus"
-	"github.com/zirius/tinyalias/middleware"
-	"github.com/zirius/tinyalias/models"
-	"github.com/zirius/tinyalias/modules/auth"
-	"github.com/zirius/tinyalias/modules/newsapi"
-	"github.com/zirius/tinyalias/modules/queue"
-	"github.com/zirius/tinyalias/modules/utils"
-	"github.com/zirius/tinyalias/pg"
+	"github.com/jasontthai/tinyalias/middleware"
+	"github.com/jasontthai/tinyalias/models"
+	"github.com/jasontthai/tinyalias/modules/auth"
+	"github.com/jasontthai/tinyalias/modules/newsapi"
+	"github.com/jasontthai/tinyalias/modules/queue"
+	"github.com/jasontthai/tinyalias/modules/utils"
+	"github.com/jasontthai/tinyalias/pg"
 )
 
 var secret string

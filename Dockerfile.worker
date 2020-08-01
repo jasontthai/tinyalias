@@ -1,7 +1,7 @@
 FROM golang:1.10-alpine
 
-COPY . /go/src/github.com/zirius/tinyalias
-WORKDIR /go/src/github.com/zirius/tinyalias
+COPY . /go/src/github.com/jasontthai/tinyalias
+WORKDIR /go/src/github.com/jasontthai/tinyalias
 
 RUN go install ./cmd/url-shortener-worker
 

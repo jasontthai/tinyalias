@@ -17,9 +17,9 @@ import (
 	"github.com/oschwald/geoip2-golang"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/zirius/tinyalias/models"
-	"github.com/zirius/tinyalias/modules/queue"
-	"github.com/zirius/tinyalias/pg"
+	"github.com/jasontthai/tinyalias/models"
+	"github.com/jasontthai/tinyalias/modules/queue"
+	"github.com/jasontthai/tinyalias/pg"
 )
 
 var (

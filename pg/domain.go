@@ -5,7 +5,7 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	"github.com/zirius/tinyalias/models"
+	"github.com/jasontthai/tinyalias/models"
 )
 
 func GetDomains(db *sqlx.DB, clauses map[string]interface{}) ([]models.Domain, error) {

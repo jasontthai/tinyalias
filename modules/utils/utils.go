@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/zirius/tinyalias/modules/auth"
+	"github.com/jasontthai/tinyalias/modules/auth"
 )
 
 const (

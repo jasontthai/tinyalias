@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/zirius/tinyalias/models"
+	"github.com/jasontthai/tinyalias/models"
 )
 
 func TestURLStat(t *testing.T) {

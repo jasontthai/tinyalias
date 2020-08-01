@@ -11,8 +11,8 @@ import (
 	"github.com/ulule/limiter"
 	mgin "github.com/ulule/limiter/drivers/middleware/gin"
 	"github.com/ulule/limiter/drivers/store/memory"
-	"github.com/zirius/tinyalias/middleware"
-	"github.com/zirius/tinyalias/modules/queue"
+	"github.com/jasontthai/tinyalias/middleware"
+	"github.com/jasontthai/tinyalias/modules/queue"
 )
 
 func GetTestPgURL() string {
